@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; }
+</style>
+</helmet>
+<div style="background:#E9E9EC; min-height:100vh; padding:0 0 80px; font-family:'IBM Plex Sans JP',system-ui,sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden;">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div style="max-width:1440px; margin:0 auto; padding:44px 40px 4px;">
+    <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:#8A8A93; font-weight:500;">DESIGN EXPLORATION · 3 OPTIONS</div>
+    <h1 style="font-size:30px; line-height:1.2; font-weight:700; color:#18181B; margin:12px 0 0; letter-spacing:-0.01em;">Q&amp;A → FAQ 抽出 ＆ 思考プロセス可視化</h1>
+    <p style="font-size:14.5px; line-height:1.7; color:#52525B; max-width:760px; margin:14px 0 0; text-wrap:pretty;">サポートの1問1答ログ（数千件）から、LLMで<strong style="color:#27272A; font-weight:600;">本質的な論点に抽象化したFAQ</strong>を抽出し、専門家がどう切り分けたかを<strong style="color:#27272A; font-weight:600;">判断木</strong>として可視化する管理画面です。同じデータ・同じ判断木を、構成の異なる3案で見比べられます。</p>
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;">
+      <span style="display:inline-flex; align-items:center; gap:7px; font-size:12px; color:#52525B; background:#fff; border:1px solid #DEDEE2; border-radius:999px; padding:6px 12px;"><span style="width:7px; height:7px; border-radius:50%; background:#4F46E5;"></span>IBM Plex Sans JP / Mono</span>
+      <span style="display:inline-flex; align-items:center; gap:7px; font-size:12px; color:#52525B; background:#fff; border:1px solid #DEDEE2; border-radius:999px; padding:6px 12px;">白基調 · 抑えた藍 · 意味色は最小限</span>
+      <span style="display:inline-flex; align-items:center; gap:7px; font-size:12px; color:#52525B; background:#fff; border:1px solid #DEDEE2; border-radius:999px; padding:6px 12px;">抽出 → レビュー → 可視化 の3工程</span>
+    </div>
+  </div>
+
+  <!-- ===== OPTION 01 — SPLIT WORKSPACE ===== -->
+  <section style="max-width:1440px; margin:0 auto; padding:40px 40px 8px;">
+    <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:18px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; color:#fff; background:#18181B; border-radius:7px; padding:4px 10px;">01</span>
+      <div>
+        <div style="font-size:17px; font-weight:700; color:#18181B;">スプリット・ワークスペース</div>
+        <div style="font-size:13px; color:#71717A; margin-top:3px;">左にFAQ一覧、中央に標準回答＋判断木、右に「元になったQ&amp;A」。抽象化の根拠まで一画面で追える定番構成。</div>
+      </div>
+    </div>
+
+    <div data-frame style="width:1360px; max-width:none; background:#fff; border:1px solid #E2E2E6; border-radius:16px; box-shadow:0 14px 40px -18px rgba(24,24,27,.22); overflow:hidden;">
+
+      <!-- top bar -->
+      <div style="height:53px; box-sizing:border-box; border-bottom:1px solid #ECECEE; display:flex; align-items:center; padding:0 16px; gap:14px;">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <div style="width:24px; height:24px; border-radius:7px; background:#4F46E5; color:#fff; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;">D</div>
+          <span style="font-size:15px; font-weight:700; color:#18181B; letter-spacing:-0.01em;">Distill</span>
+        </div>
+        <div style="width:1px; height:20px; background:#ECECEE;"></div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#52525B; background:#F6F6F7; border:1px solid #ECECEE; border-radius:8px; padding:5px 10px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"></path></svg>
+          サポートログ / 2024 Q2
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">3,482件</span>
+        </div>
+        <div style="flex:1; max-width:340px; margin:0 auto; display:flex; align-items:center; gap:8px; background:#F6F6F7; border:1px solid #ECECEE; border-radius:9px; padding:7px 12px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+          <span style="font-size:12.5px; color:#A1A1AA;">FAQ・原因・キーワードで検索</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
+          <button style="display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-size:12.5px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:9px; padding:8px 14px; cursor:pointer;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 3v3M12 18v3M5 12H2M22 12h-3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"></path></svg>
+            AI 再抽出
+          </button>
+          <div style="width:30px; height:30px; border-radius:50%; background:#E4E4E7; border:1px solid #DADADE;"></div>
+        </div>
+      </div>
+
+      <!-- body -->
+      <div style="display:flex; height:787px;">
+
+        <!-- LEFT: FAQ list -->
+        <div style="width:300px; box-sizing:border-box; border-right:1px solid #ECECEE; display:flex; flex-direction:column;">
+          <div style="padding:16px 16px 10px; display:flex; align-items:center; gap:8px;">
+            <span style="font-size:13px; font-weight:700; color:#18181B;">抽出されたFAQ</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#4F46E5; background:#EEF0FF; border-radius:6px; padding:1px 7px; font-weight:600;">312</span>
+            <span style="margin-left:auto; font-size:11px; color:#A1A1AA; font-family:'IBM Plex Mono',monospace;">件数順 ▾</span>
+          </div>
+          <div style="display:flex; gap:6px; padding:0 16px 12px;">
+            <span style="font-size:11.5px; font-weight:600; color:#fff; background:#27272A; border-radius:999px; padding:4px 11px;">すべて</span>
+            <span style="font-size:11.5px; color:#52525B; background:#F4F4F5; border-radius:999px; padding:4px 11px;">未レビュー</span>
+            <span style="font-size:11.5px; color:#52525B; background:#F4F4F5; border-radius:999px; padding:4px 11px;">高信頼</span>
+          </div>
+          <div style="flex:1; overflow:hidden; padding:0 12px 12px; display:flex; flex-direction:column; gap:7px;">
+
+            <div style="padding:11px 12px; border-radius:11px; border:1px solid #C7D2FE; background:#F5F6FF; cursor:pointer;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#4338CA; background:#E4E7FF; border-radius:5px; padding:2px 7px;">認証</span>
+                <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#1C6B4F;"><span style="width:6px;height:6px;border-radius:50%;background:#1C9C6B;"></span>94%</span>
+              </div>
+              <div style="font-size:13px; font-weight:600; color:#18181B; line-height:1.45; margin-top:8px;">サインインできない原因の切り分け</div>
+              <div style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:#A1A1AA; margin-top:8px;"><span style="color:#52525B;">412</span> 件を集約 · 3日前</div>
+            </div>
+
+            <div style="padding:11px 12px; border-radius:11px; border:1px solid #EDEDED; background:#fff; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:2px 7px;">課金</span>
+                <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#9A6212;"><span style="width:6px;height:6px;border-radius:50%;background:#D08A1E;"></span>88%</span>
+              </div>
+              <div style="font-size:13px; font-weight:600; color:#27272A; line-height:1.45; margin-top:8px;">請求額が想定と違う</div>
+              <div style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:#A1A1AA; margin-top:8px;"><span style="color:#52525B;">287</span> 件を集約 · 5日前</div>
+            </div>
+
+            <div style="padding:11px 12px; border-radius:11px; border:1px solid #EDEDED; background:#fff; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:2px 7px;">同期</span>
+                <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#1C6B4F;"><span style="width:6px;height:6px;border-radius:50%;background:#1C9C6B;"></span>91%</span>
+              </div>
+              <div style="font-size:13px; font-weight:600; color:#27272A; line-height:1.45; margin-top:8px;">変更が他の端末に反映されない</div>
+              <div style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:#A1A1AA; margin-top:8px;"><span style="color:#52525B;">203</span> 件を集約 · 1週間前</div>
+            </div>
+
+            <div style="padding:11px 12px; border-radius:11px; border:1px solid #EDEDED; background:#fff; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:2px 7px;">通知</span>
+                <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#9A6212;"><span style="width:6px;height:6px;border-radius:50%;background:#D08A1E;"></span>85%</span>
+              </div>
+              <div style="font-size:13px; font-weight:600; color:#27272A; line-height:1.45; margin-top:8px;">メール・プッシュ通知が届かない</div>
+              <div style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:#A1A1AA; margin-top:8px;"><span style="color:#52525B;">176</span> 件を集約 · 4日前</div>
+            </div>
+
+            <div style="padding:11px 12px; border-radius:11px; border:1px solid #EDEDED; background:#fff; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:2px 7px;">データ</span>
+                <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#1C6B4F;"><span style="width:6px;height:6px;border-radius:50%;background:#1C9C6B;"></span>90%</span>
+              </div>
+              <div style="font-size:13px; font-weight:600; color:#27272A; line-height:1.45; margin-top:8px;">エクスポート／インポートの失敗</div>
+              <div style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:#A1A1AA; margin-top:8px;"><span style="color:#52525B;">131</span> 件を集約 · 2日前</div>
+            </div>
+
+            <div style="padding:11px 12px; border-radius:11px; border:1px solid #EDEDED; background:#fff; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:2px 7px;">権限</span>
+                <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#9A6212;"><span style="width:6px;height:6px;border-radius:50%;background:#D08A1E;"></span>82%</span>
+              </div>
+              <div style="font-size:13px; font-weight:600; color:#27272A; line-height:1.45; margin-top:8px;">共有・アクセス権限の設定</div>
+              <div style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:#A1A1AA; margin-top:8px;"><span style="color:#52525B;">98</span> 件を集約 · 6日前</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CENTER: detail + tree -->
+        <div style="flex:1; box-sizing:border-box; display:flex; flex-direction:column; min-width:0;">
+          <div style="padding:20px 24px 16px; border-bottom:1px solid #ECECEE;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA; letter-spacing:.04em;">アカウント・認証 / サインイン</div>
+            <h2 style="font-size:19px; font-weight:700; color:#18181B; margin:8px 0 0; letter-spacing:-0.01em;">サインインできない原因の切り分け</h2>
+            <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:12px;">
+              <span style="font-size:11.5px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:6px; padding:3px 9px;">集約 <span style="color:#18181B; font-weight:600;">412</span> 件</span>
+              <span style="font-size:11.5px; font-family:'IBM Plex Mono',monospace; color:#1C6B4F; background:#E7F4EE; border-radius:6px; padding:3px 9px;">信頼度 94%</span>
+              <span style="font-size:11.5px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:6px; padding:3px 9px;">サポートログ 2024 Q2</span>
+              <span style="font-size:11.5px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:6px; padding:3px 9px;">更新 3日前</span>
+            </div>
+            <div style="margin-top:14px; background:#FAFAFA; border:1px solid #EFEFF1; border-radius:11px; padding:13px 15px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; color:#8A8A93; font-weight:600;">AI 標準回答 / CANONICAL ANSWER</div>
+              <p style="font-size:13px; line-height:1.75; color:#3F3F46; margin:8px 0 0; text-wrap:pretty;">まずエラーメッセージの有無を確認します。表示される場合はパスワードの再設定を案内し、表示されない場合はキャッシュ削除またはシークレットウィンドウでの再試行を案内してください。改善しない場合はSSO／IdP側の障害を確認し、管理者へエスカレーションします。</p>
+            </div>
+          </div>
+          <div style="padding:16px 24px 8px; display:flex; align-items:center; gap:10px;">
+            <span style="font-size:14px; font-weight:700; color:#18181B;">専門家の思考プロセス</span>
+            <span style="font-size:11.5px; color:#A1A1AA; font-family:'IBM Plex Mono',monospace;">判断木 · 自動生成</span>
+            <div style="margin-left:auto; display:flex; align-items:center; border:1px solid #ECECEE; border-radius:9px; overflow:hidden;">
+              <button style="font-family:inherit; border:none; background:#fff; color:#52525B; font-size:14px; padding:5px 11px; cursor:pointer;">−</button>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#71717A; padding:0 8px; border-left:1px solid #ECECEE; border-right:1px solid #ECECEE;">100%</span>
+              <button style="font-family:inherit; border:none; background:#fff; color:#52525B; font-size:14px; padding:5px 11px; cursor:pointer;">+</button>
+              <button style="font-family:inherit; border:none; border-left:1px solid #ECECEE; background:#fff; color:#52525B; font-size:11px; padding:6px 11px; cursor:pointer;">⤢ 全体</button>
+            </div>
+          </div>
+          <div style="flex:1; padding:8px 24px 24px; display:flex; justify-content:center; align-items:flex-start;">
+            <div style="width:720px; border:1px solid #E6E6E9; border-radius:14px; overflow:hidden;">
+              <dc-import name="ThinkTree" hint-size="720px,500px"></dc-import>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: essence + source Q&A -->
+        <div style="width:300px; box-sizing:border-box; border-left:1px solid #ECECEE; padding:18px 16px; overflow:hidden;">
+          <div style="background:#F5F6FF; border:1px solid #DDE1FF; border-radius:12px; padding:14px;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; color:#6366F1; font-weight:600;">ESSENCE / 本質的な論点</div>
+            <p style="font-size:13px; line-height:1.7; color:#312E81; margin:9px 0 0; font-weight:500; text-wrap:pretty;">認証失敗の約8割は<strong style="font-weight:700;">パスワード失念</strong>と<strong style="font-weight:700;">ブラウザのキャッシュ不整合</strong>。エラーメッセージの有無を最初に確認すれば、2ステップで原因を切り分けられる。</p>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; margin-top:22px;">
+            <span style="font-size:13px; font-weight:700; color:#18181B;">元になったQ&amp;A</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">412件中 3件</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+
+            <div style="border:1px solid #EDEDED; border-radius:11px; padding:11px 12px;">
+              <div style="display:flex; gap:7px;">
+                <span style="font-size:9.5px; font-weight:700; font-family:'IBM Plex Mono',monospace; color:#fff; background:#71717A; border-radius:4px; padding:1px 5px; height:fit-content;">Q</span>
+                <span style="font-size:12px; color:#27272A; line-height:1.5;">何度パスワードを入れてもログインできません</span>
+              </div>
+              <p style="font-size:11.5px; color:#71717A; line-height:1.55; margin:8px 0 0; padding-left:24px;">パスワードリセットのメールをお送りします…</p>
+              <div style="margin-top:9px; padding-left:24px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#9A6212; background:#FAF1E1; border-radius:5px; padding:2px 7px;">→ パスワード失念</span></div>
+            </div>
+
+            <div style="border:1px solid #EDEDED; border-radius:11px; padding:11px 12px;">
+              <div style="display:flex; gap:7px;">
+                <span style="font-size:9.5px; font-weight:700; font-family:'IBM Plex Mono',monospace; color:#fff; background:#71717A; border-radius:4px; padding:1px 5px; height:fit-content;">Q</span>
+                <span style="font-size:12px; color:#27272A; line-height:1.5;">ログイン画面が真っ白で進めません</span>
+              </div>
+              <p style="font-size:11.5px; color:#71717A; line-height:1.55; margin:8px 0 0; padding-left:24px;">キャッシュを削除し、シークレットウィンドウでお試しください…</p>
+              <div style="margin-top:9px; padding-left:24px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#1C6B4F; background:#E7F4EE; border-radius:5px; padding:2px 7px;">→ キャッシュ不整合</span></div>
+            </div>
+
+            <div style="border:1px solid #EDEDED; border-radius:11px; padding:11px 12px;">
+              <div style="display:flex; gap:7px;">
+                <span style="font-size:9.5px; font-weight:700; font-family:'IBM Plex Mono',monospace; color:#fff; background:#71717A; border-radius:4px; padding:1px 5px; height:fit-content;">Q</span>
+                <span style="font-size:12px; color:#27272A; line-height:1.5;">急に社員全員がログインできなくなった</span>
+              </div>
+              <p style="font-size:11.5px; color:#71717A; line-height:1.55; margin:8px 0 0; padding-left:24px;">SSO連携の障害が発生しております。復旧までお待ちください…</p>
+              <div style="margin-top:9px; padding-left:24px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#8E302D; background:#F7E9E8; border-radius:5px; padding:2px 7px;">→ SSO／IdP障害</span></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== OPTION 02 — CANVAS-FIRST MAP ===== -->
+  <section style="max-width:1440px; margin:0 auto; padding:40px 40px 8px;">
+    <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:18px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; color:#fff; background:#18181B; border-radius:7px; padding:4px 10px;">02</span>
+      <div>
+        <div style="font-size:17px; font-weight:700; color:#18181B;">キャンバス・ファースト（マップ）</div>
+        <div style="font-size:13px; color:#71717A; margin-top:3px;">判断木そのものを主役に。パン／ズーム・ミニマップを備え、クラスタ間を探索しながら思考の地図を読む構成。</div>
+      </div>
+    </div>
+
+    <div data-frame style="width:1360px; max-width:none; background:#fff; border:1px solid #E2E2E6; border-radius:16px; box-shadow:0 14px 40px -18px rgba(24,24,27,.22); overflow:hidden;">
+
+      <!-- top bar -->
+      <div style="height:53px; box-sizing:border-box; border-bottom:1px solid #ECECEE; display:flex; align-items:center; padding:0 16px; gap:14px;">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <div style="width:24px; height:24px; border-radius:7px; background:#4F46E5; color:#fff; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;">D</div>
+          <span style="font-size:15px; font-weight:700; color:#18181B; letter-spacing:-0.01em;">Distill</span>
+        </div>
+        <div style="width:1px; height:20px; background:#ECECEE;"></div>
+        <div style="display:flex; align-items:center; background:#F4F4F5; border-radius:9px; padding:3px;">
+          <span style="font-size:12px; font-weight:600; color:#52525B; padding:5px 12px; border-radius:7px;">リスト</span>
+          <span style="font-size:12px; font-weight:600; color:#18181B; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.06); padding:5px 12px; border-radius:7px;">マップ</span>
+          <span style="font-size:12px; font-weight:600; color:#52525B; padding:5px 12px; border-radius:7px;">表</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#52525B; background:#F6F6F7; border:1px solid #ECECEE; border-radius:8px; padding:5px 10px;">
+          サポートログ / 2024 Q2 <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">3,482件</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
+          <button style="display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-size:12.5px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:9px; padding:8px 14px; cursor:pointer;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 3v3M12 18v3M5 12H2M22 12h-3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"></path></svg>
+            AI 再抽出
+          </button>
+          <div style="width:30px; height:30px; border-radius:50%; background:#E4E4E7; border:1px solid #DADADE;"></div>
+        </div>
+      </div>
+
+      <!-- body -->
+      <div style="display:flex; height:787px;">
+
+        <!-- LEFT: cluster heatmap -->
+        <div style="width:262px; box-sizing:border-box; border-right:1px solid #ECECEE; display:flex; flex-direction:column; padding:16px 14px;">
+          <div style="display:flex; align-items:center; gap:8px; padding:0 2px 12px;">
+            <span style="font-size:13px; font-weight:700; color:#18181B;">FAQクラスタ</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#4F46E5; background:#EEF0FF; border-radius:6px; padding:1px 7px; font-weight:600;">312</span>
+            <span style="margin-left:auto; font-size:11px; color:#A1A1AA; font-family:'IBM Plex Mono',monospace;">規模順</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:3px;">
+
+            <div style="padding:10px 10px; border-radius:10px; background:#F5F6FF; border:1px solid #DDE1FF; cursor:pointer;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#4F46E5;"></span>
+                <span style="font-size:12.5px; font-weight:600; color:#312E81;">ログイン・認証エラー</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#4338CA; font-weight:600;">412</span>
+              </div>
+              <div style="height:5px; border-radius:3px; background:#E4E7FF; margin-top:9px; overflow:hidden;"><div style="width:100%; height:100%; background:#4F46E5; border-radius:3px;"></div></div>
+            </div>
+
+            <div style="padding:10px 10px; border-radius:10px; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#D08A1E;"></span>
+                <span style="font-size:12.5px; font-weight:500; color:#3F3F46;">請求・課金の不一致</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">287</span>
+              </div>
+              <div style="height:5px; border-radius:3px; background:#F0F0F2; margin-top:9px; overflow:hidden;"><div style="width:70%; height:100%; background:#D6B78A; border-radius:3px;"></div></div>
+            </div>
+
+            <div style="padding:10px 10px; border-radius:10px; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#1C9C6B;"></span>
+                <span style="font-size:12.5px; font-weight:500; color:#3F3F46;">データ同期の遅延</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">203</span>
+              </div>
+              <div style="height:5px; border-radius:3px; background:#F0F0F2; margin-top:9px; overflow:hidden;"><div style="width:49%; height:100%; background:#9AD4BD; border-radius:3px;"></div></div>
+            </div>
+
+            <div style="padding:10px 10px; border-radius:10px; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#7C7FE0;"></span>
+                <span style="font-size:12.5px; font-weight:500; color:#3F3F46;">通知が届かない</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">176</span>
+              </div>
+              <div style="height:5px; border-radius:3px; background:#F0F0F2; margin-top:9px; overflow:hidden;"><div style="width:43%; height:100%; background:#C3C5EF; border-radius:3px;"></div></div>
+            </div>
+
+            <div style="padding:10px 10px; border-radius:10px; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#A1A1AA;"></span>
+                <span style="font-size:12.5px; font-weight:500; color:#3F3F46;">エクスポート失敗</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">131</span>
+              </div>
+              <div style="height:5px; border-radius:3px; background:#F0F0F2; margin-top:9px; overflow:hidden;"><div style="width:32%; height:100%; background:#D4D4D8; border-radius:3px;"></div></div>
+            </div>
+
+            <div style="padding:10px 10px; border-radius:10px; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#A1A1AA;"></span>
+                <span style="font-size:12.5px; font-weight:500; color:#3F3F46;">権限・共有設定</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">98</span>
+              </div>
+              <div style="height:5px; border-radius:3px; background:#F0F0F2; margin-top:9px; overflow:hidden;"><div style="width:24%; height:100%; background:#D4D4D8; border-radius:3px;"></div></div>
+            </div>
+
+            <div style="padding:10px 10px; border-radius:10px; cursor:pointer;" style-hover="background:#FAFAFA;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#A1A1AA;"></span>
+                <span style="font-size:12.5px; font-weight:500; color:#3F3F46;">APIレート制限</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">74</span>
+              </div>
+              <div style="height:5px; border-radius:3px; background:#F0F0F2; margin-top:9px; overflow:hidden;"><div style="width:18%; height:100%; background:#D4D4D8; border-radius:3px;"></div></div>
+            </div>
+
+          </div>
+          <div style="margin-top:auto; padding-top:14px; border-top:1px solid #F0F0F2; font-size:11px; color:#A1A1AA; line-height:1.6;">表示中のクラスタの判断木をキャンバスに展開しています。ノードをクリックすると元のQ&amp;Aへ。</div>
+        </div>
+
+        <!-- CENTER: canvas hero -->
+        <div style="flex:1; position:relative; background:#F3F3F6; overflow:hidden;">
+
+          <!-- scaled tree -->
+          <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.16);">
+            <dc-import name="ThinkTree" hint-size="720px,500px"></dc-import>
+          </div>
+
+          <!-- top-left floating info -->
+          <div style="position:absolute; top:18px; left:18px; width:286px; background:#fff; border:1px solid #E6E6E9; border-radius:13px; box-shadow:0 8px 24px -12px rgba(24,24,27,.25); padding:15px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#4338CA; background:#E4E7FF; border-radius:5px; padding:2px 7px;">認証</span>
+              <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#1C6B4F;"><span style="width:6px;height:6px;border-radius:50%;background:#1C9C6B;"></span>信頼度 94%</span>
+            </div>
+            <div style="font-size:15px; font-weight:700; color:#18181B; margin-top:10px; line-height:1.4;">サインインできない原因の切り分け</div>
+            <p style="font-size:12px; color:#52525B; line-height:1.65; margin:9px 0 0; text-wrap:pretty;">認証失敗の約8割はパスワード失念とキャッシュ不整合。エラー表示の有無で2手に分かれる。</p>
+            <div style="display:flex; gap:14px; margin-top:12px; padding-top:11px; border-top:1px solid #F0F0F2;">
+              <div><div style="font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600; color:#18181B;">412</div><div style="font-size:10px; color:#A1A1AA; margin-top:1px;">集約件数</div></div>
+              <div><div style="font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600; color:#18181B;">8</div><div style="font-size:10px; color:#A1A1AA; margin-top:1px;">ノード</div></div>
+              <div><div style="font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600; color:#18181B;">4</div><div style="font-size:10px; color:#A1A1AA; margin-top:1px;">根本原因</div></div>
+            </div>
+          </div>
+
+          <!-- top-right controls -->
+          <div style="position:absolute; top:18px; right:18px; display:flex; flex-direction:column; background:#fff; border:1px solid #E6E6E9; border-radius:11px; box-shadow:0 4px 14px -8px rgba(24,24,27,.25); overflow:hidden;">
+            <button style="font-family:inherit; border:none; background:#fff; color:#3F3F46; font-size:17px; width:38px; height:36px; cursor:pointer;">+</button>
+            <button style="font-family:inherit; border:none; border-top:1px solid #F0F0F2; background:#fff; color:#3F3F46; font-size:17px; width:38px; height:36px; cursor:pointer;">−</button>
+            <button style="font-family:inherit; border:none; border-top:1px solid #F0F0F2; background:#fff; color:#3F3F46; font-size:13px; width:38px; height:36px; cursor:pointer;">⤢</button>
+            <button style="font-family:inherit; border:none; border-top:1px solid #F0F0F2; background:#fff; color:#A1A1AA; font-size:12px; width:38px; height:36px; cursor:pointer;">🔒</button>
+          </div>
+
+          <!-- bottom-left attribution -->
+          <div style="position:absolute; bottom:18px; left:18px; display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.85); border:1px solid #E6E6E9; border-radius:8px; padding:5px 10px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#71717A;">
+            <span style="width:7px; height:7px; border-radius:50%; background:#4F46E5;"></span>Distill flow · 判断木 8ノード
+          </div>
+
+          <!-- bottom-right minimap -->
+          <div style="position:absolute; bottom:18px; right:18px; width:172px; height:108px; background:#fff; border:1px solid #E6E6E9; border-radius:10px; box-shadow:0 4px 14px -8px rgba(24,24,27,.25); overflow:hidden;">
+            <div style="position:absolute; inset:0; background-image:radial-gradient(#E4E4E7 1px, transparent 1px); background-size:10px 10px;"></div>
+            <div style="position:absolute; left:14px; top:48px; width:22px; height:11px; border-radius:3px; background:#C3C5EF;"></div>
+            <div style="position:absolute; left:48px; top:48px; width:22px; height:11px; border-radius:3px; background:#C9C9CE;"></div>
+            <div style="position:absolute; left:82px; top:26px; width:22px; height:11px; border-radius:3px; background:#C9C9CE;"></div>
+            <div style="position:absolute; left:82px; top:70px; width:22px; height:11px; border-radius:3px; background:#C9C9CE;"></div>
+            <div style="position:absolute; left:120px; top:14px; width:24px; height:11px; border-radius:3px; background:#E2C79A;"></div>
+            <div style="position:absolute; left:120px; top:38px; width:24px; height:11px; border-radius:3px; background:#E2C79A;"></div>
+            <div style="position:absolute; left:120px; top:62px; width:24px; height:11px; border-radius:3px; background:#A6D9C3;"></div>
+            <div style="position:absolute; left:120px; top:86px; width:24px; height:11px; border-radius:3px; background:#E6ADA9;"></div>
+            <div style="position:absolute; left:6px; top:6px; width:120px; height:84px; border:1.5px solid #4F46E5; border-radius:5px; background:rgba(79,70,229,.06);"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== OPTION 03 — TRIAGE TABLE ===== -->
+  <section style="max-width:1440px; margin:0 auto; padding:40px 40px 8px;">
+    <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:18px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; color:#fff; background:#18181B; border-radius:7px; padding:4px 10px;">03</span>
+      <div>
+        <div style="font-size:17px; font-weight:700; color:#18181B;">トリアージ・テーブル</div>
+        <div style="font-size:13px; color:#71717A; margin-top:3px;">数千件を捌くための一覧。信頼度・件数・レビュー状態で絞り込み、行を開くと詳細と判断木がスライドオーバーで出る運用向け構成。</div>
+      </div>
+    </div>
+
+    <div data-frame style="width:1360px; max-width:none; background:#fff; border:1px solid #E2E2E6; border-radius:16px; box-shadow:0 14px 40px -18px rgba(24,24,27,.22); overflow:hidden;">
+
+      <!-- top bar -->
+      <div style="height:53px; box-sizing:border-box; border-bottom:1px solid #ECECEE; display:flex; align-items:center; padding:0 16px; gap:14px;">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <div style="width:24px; height:24px; border-radius:7px; background:#4F46E5; color:#fff; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;">D</div>
+          <span style="font-size:15px; font-weight:700; color:#18181B; letter-spacing:-0.01em;">Distill</span>
+        </div>
+        <div style="width:1px; height:20px; background:#ECECEE;"></div>
+        <div style="display:flex; align-items:center; background:#F4F4F5; border-radius:9px; padding:3px;">
+          <span style="font-size:12px; font-weight:600; color:#52525B; padding:5px 12px; border-radius:7px;">リスト</span>
+          <span style="font-size:12px; font-weight:600; color:#52525B; padding:5px 12px; border-radius:7px;">マップ</span>
+          <span style="font-size:12px; font-weight:600; color:#18181B; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.06); padding:5px 12px; border-radius:7px;">表</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#52525B; background:#F6F6F7; border:1px solid #ECECEE; border-radius:8px; padding:5px 10px;">
+          サポートログ / 2024 Q2 <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">3,482件</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
+          <button style="display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-size:12.5px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:9px; padding:8px 14px; cursor:pointer;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 3v3M12 18v3M5 12H2M22 12h-3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"></path></svg>
+            AI 再抽出
+          </button>
+          <div style="width:30px; height:30px; border-radius:50%; background:#E4E4E7; border:1px solid #DADADE;"></div>
+        </div>
+      </div>
+
+      <!-- toolbar -->
+      <div style="height:50px; box-sizing:border-box; border-bottom:1px solid #ECECEE; display:flex; align-items:center; padding:0 18px; gap:9px;">
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#3F3F46; border:1px solid #E4E4E7; border-radius:8px; padding:6px 11px; cursor:pointer;">カテゴリ <span style="color:#A1A1AA;">▾</span></div>
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#3F3F46; border:1px solid #E4E4E7; border-radius:8px; padding:6px 11px; cursor:pointer;">信頼度 <span style="color:#A1A1AA;">▾</span></div>
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#fff; background:#27272A; border:1px solid #27272A; border-radius:8px; padding:6px 11px; cursor:pointer;">未レビュー <span style="font-family:'IBM Plex Mono',monospace; opacity:.7;">·142</span></div>
+        <div style="flex:1; max-width:280px; display:flex; align-items:center; gap:8px; background:#F6F6F7; border:1px solid #ECECEE; border-radius:8px; padding:6px 11px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+          <span style="font-size:12px; color:#A1A1AA;">FAQを検索</span>
+        </div>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+          <span style="font-size:12px; color:#71717A; font-family:'IBM Plex Mono',monospace;">3件選択中</span>
+          <button style="font-family:inherit; font-size:12px; font-weight:600; color:#1C6B4F; background:#E7F4EE; border:1px solid #C7E6D7; border-radius:8px; padding:6px 13px; cursor:pointer;">選択を承認</button>
+        </div>
+      </div>
+
+      <!-- table + slide-over -->
+      <div style="display:flex; height:734px;">
+
+        <!-- TABLE -->
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+          <!-- header -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:11px 18px; border-bottom:1px solid #ECECEE; background:#FBFBFC; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; color:#8A8A93; font-weight:600;">
+            <div style="width:15px; height:15px; border:1.5px solid #C9C9CE; border-radius:4px;"></div>
+            <div>抽象化された問い</div>
+            <div>根本原因</div>
+            <div style="text-align:right;">件数</div>
+            <div>信頼度</div>
+            <div>ステータス</div>
+          </div>
+
+          <!-- row 1 (selected) -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:13px 18px; border-bottom:1px solid #F2F2F4; background:#F5F6FF; box-shadow:inset 3px 0 0 #4F46E5; cursor:pointer;">
+            <div style="width:15px; height:15px; border:1.5px solid #4F46E5; border-radius:4px; background:#4F46E5; display:flex; align-items:center; justify-content:center;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"></path></svg></div>
+            <div style="padding-right:14px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#4338CA; background:#E4E7FF; border-radius:5px; padding:1px 6px; margin-right:8px;">認証</span><span style="font-size:13px; font-weight:600; color:#18181B;">サインインできない原因の切り分け</span></div>
+            <div style="font-size:12px; color:#52525B;">パスワード／キャッシュ系</div>
+            <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#18181B; font-weight:600;">412</div>
+            <div style="display:flex; align-items:center; gap:8px;"><div style="width:46px; height:5px; border-radius:3px; background:#E7F4EE; overflow:hidden;"><div style="width:94%; height:100%; background:#1C9C6B;"></div></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#1C6B4F;">94</span></div>
+            <div><span style="font-size:11px; font-weight:600; color:#9A6212; background:#FAF1E1; border-radius:6px; padding:3px 9px;">未レビュー</span></div>
+          </div>
+
+          <!-- row 2 -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:13px 18px; border-bottom:1px solid #F2F2F4; cursor:pointer;" style-hover="background:#FAFAFA;">
+            <div style="width:15px; height:15px; border:1.5px solid #C9C9CE; border-radius:4px;"></div>
+            <div style="padding-right:14px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:1px 6px; margin-right:8px;">課金</span><span style="font-size:13px; font-weight:500; color:#27272A;">請求額が想定と違う</span></div>
+            <div style="font-size:12px; color:#71717A;">日割り計算の誤解</div>
+            <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#3F3F46;">287</div>
+            <div style="display:flex; align-items:center; gap:8px;"><div style="width:46px; height:5px; border-radius:3px; background:#F0F0F2; overflow:hidden;"><div style="width:88%; height:100%; background:#D08A1E;"></div></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#9A6212;">88</span></div>
+            <div><span style="font-size:11px; font-weight:600; color:#1C6B4F; background:#E7F4EE; border-radius:6px; padding:3px 9px;">承認済み</span></div>
+          </div>
+
+          <!-- row 3 -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:13px 18px; border-bottom:1px solid #F2F2F4; cursor:pointer;" style-hover="background:#FAFAFA;">
+            <div style="width:15px; height:15px; border:1.5px solid #C9C9CE; border-radius:4px;"></div>
+            <div style="padding-right:14px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:1px 6px; margin-right:8px;">同期</span><span style="font-size:13px; font-weight:500; color:#27272A;">変更が他の端末に反映されない</span></div>
+            <div style="font-size:12px; color:#71717A;">オフライン編集の競合</div>
+            <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#3F3F46;">203</div>
+            <div style="display:flex; align-items:center; gap:8px;"><div style="width:46px; height:5px; border-radius:3px; background:#F0F0F2; overflow:hidden;"><div style="width:91%; height:100%; background:#1C9C6B;"></div></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#1C6B4F;">91</span></div>
+            <div><span style="font-size:11px; font-weight:600; color:#9A6212; background:#FAF1E1; border-radius:6px; padding:3px 9px;">未レビュー</span></div>
+          </div>
+
+          <!-- row 4 -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:13px 18px; border-bottom:1px solid #F2F2F4; cursor:pointer;" style-hover="background:#FAFAFA;">
+            <div style="width:15px; height:15px; border:1.5px solid #C9C9CE; border-radius:4px;"></div>
+            <div style="padding-right:14px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:1px 6px; margin-right:8px;">通知</span><span style="font-size:13px; font-weight:500; color:#27272A;">メール・プッシュ通知が届かない</span></div>
+            <div style="font-size:12px; color:#71717A;">迷惑メール振り分け</div>
+            <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#3F3F46;">176</div>
+            <div style="display:flex; align-items:center; gap:8px;"><div style="width:46px; height:5px; border-radius:3px; background:#F0F0F2; overflow:hidden;"><div style="width:85%; height:100%; background:#D08A1E;"></div></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#9A6212;">85</span></div>
+            <div><span style="font-size:11px; font-weight:600; color:#52525B; background:#F4F4F5; border-radius:6px; padding:3px 9px;">編集中</span></div>
+          </div>
+
+          <!-- row 5 -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:13px 18px; border-bottom:1px solid #F2F2F4; cursor:pointer;" style-hover="background:#FAFAFA;">
+            <div style="width:15px; height:15px; border:1.5px solid #C9C9CE; border-radius:4px;"></div>
+            <div style="padding-right:14px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:1px 6px; margin-right:8px;">データ</span><span style="font-size:13px; font-weight:500; color:#27272A;">エクスポート／インポートの失敗</span></div>
+            <div style="font-size:12px; color:#71717A;">文字コード不一致</div>
+            <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#3F3F46;">131</div>
+            <div style="display:flex; align-items:center; gap:8px;"><div style="width:46px; height:5px; border-radius:3px; background:#F0F0F2; overflow:hidden;"><div style="width:90%; height:100%; background:#1C9C6B;"></div></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#1C6B4F;">90</span></div>
+            <div><span style="font-size:11px; font-weight:600; color:#1C6B4F; background:#E7F4EE; border-radius:6px; padding:3px 9px;">承認済み</span></div>
+          </div>
+
+          <!-- row 6 -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:13px 18px; border-bottom:1px solid #F2F2F4; cursor:pointer;" style-hover="background:#FAFAFA;">
+            <div style="width:15px; height:15px; border:1.5px solid #C9C9CE; border-radius:4px;"></div>
+            <div style="padding-right:14px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:1px 6px; margin-right:8px;">権限</span><span style="font-size:13px; font-weight:500; color:#27272A;">共有・アクセス権限の設定</span></div>
+            <div style="font-size:12px; color:#71717A;">ロール継承の誤り</div>
+            <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#3F3F46;">98</div>
+            <div style="display:flex; align-items:center; gap:8px;"><div style="width:46px; height:5px; border-radius:3px; background:#F0F0F2; overflow:hidden;"><div style="width:82%; height:100%; background:#D08A1E;"></div></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#9A6212;">82</span></div>
+            <div><span style="font-size:11px; font-weight:600; color:#9A6212; background:#FAF1E1; border-radius:6px; padding:3px 9px;">未レビュー</span></div>
+          </div>
+
+          <!-- row 7 -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:13px 18px; border-bottom:1px solid #F2F2F4; cursor:pointer;" style-hover="background:#FAFAFA;">
+            <div style="width:15px; height:15px; border:1.5px solid #C9C9CE; border-radius:4px;"></div>
+            <div style="padding-right:14px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:1px 6px; margin-right:8px;">API</span><span style="font-size:13px; font-weight:500; color:#27272A;">APIレート制限に達する</span></div>
+            <div style="font-size:12px; color:#71717A;">バースト呼び出し</div>
+            <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#3F3F46;">74</div>
+            <div style="display:flex; align-items:center; gap:8px;"><div style="width:46px; height:5px; border-radius:3px; background:#E7F4EE; overflow:hidden;"><div style="width:96%; height:100%; background:#1C9C6B;"></div></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#1C6B4F;">96</span></div>
+            <div><span style="font-size:11px; font-weight:600; color:#1C6B4F; background:#E7F4EE; border-radius:6px; padding:3px 9px;">承認済み</span></div>
+          </div>
+
+          <!-- row 8 -->
+          <div style="display:grid; grid-template-columns:30px minmax(0,1fr) 158px 66px 100px 108px; align-items:center; padding:13px 18px; border-bottom:1px solid #F2F2F4; cursor:pointer;" style-hover="background:#FAFAFA;">
+            <div style="width:15px; height:15px; border:1.5px solid #C9C9CE; border-radius:4px;"></div>
+            <div style="padding-right:14px;"><span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#52525B; background:#F4F4F5; border-radius:5px; padding:1px 6px; margin-right:8px;">アプリ</span><span style="font-size:13px; font-weight:500; color:#27272A;">モバイルアプリが強制終了する</span></div>
+            <div style="font-size:12px; color:#71717A;">メモリ不足（旧端末）</div>
+            <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#3F3F46;">63</div>
+            <div style="display:flex; align-items:center; gap:8px;"><div style="width:46px; height:5px; border-radius:3px; background:#F0F0F2; overflow:hidden;"><div style="width:79%; height:100%; background:#B0413E;"></div></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8E302D;">79</span></div>
+            <div><span style="font-size:11px; font-weight:600; color:#9A6212; background:#FAF1E1; border-radius:6px; padding:3px 9px;">未レビュー</span></div>
+          </div>
+
+          <div style="margin-top:auto; padding:12px 18px; border-top:1px solid #ECECEE; display:flex; align-items:center; font-size:11.5px; color:#A1A1AA; font-family:'IBM Plex Mono',monospace;">
+            312件中 1–8 を表示<span style="margin-left:auto; display:flex; gap:4px;"><span style="border:1px solid #E4E4E7; border-radius:6px; padding:3px 8px; color:#52525B;">‹</span><span style="border:1px solid #E4E4E7; border-radius:6px; padding:3px 8px; color:#52525B;">›</span></span></div>
+        </div>
+
+        <!-- SLIDE-OVER -->
+        <div style="width:440px; box-sizing:border-box; border-left:1px solid #ECECEE; background:#fff; display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:center; padding:15px 20px 0;">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; color:#A1A1AA; font-weight:600;">FAQ 詳細</span>
+            <span style="margin-left:auto; width:26px; height:26px; border-radius:7px; border:1px solid #ECECEE; display:flex; align-items:center; justify-content:center; color:#A1A1AA; cursor:pointer;">✕</span>
+          </div>
+          <div style="flex:1; overflow:hidden; padding:14px 20px 0;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#4338CA; background:#E4E7FF; border-radius:5px; padding:2px 7px;">認証</span>
+              <span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#1C6B4F;"><span style="width:6px;height:6px;border-radius:50%;background:#1C9C6B;"></span>信頼度 94%</span>
+              <span style="margin-left:auto; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">412件を集約</span>
+            </div>
+            <h2 style="font-size:17px; font-weight:700; color:#18181B; margin:11px 0 0; line-height:1.4; letter-spacing:-0.01em;">サインインできない原因の切り分け</h2>
+
+            <div style="background:#F5F6FF; border:1px solid #DDE1FF; border-radius:11px; padding:12px 13px; margin-top:14px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; color:#6366F1; font-weight:600;">ESSENCE / 本質的な論点</div>
+              <p style="font-size:12.5px; line-height:1.65; color:#312E81; margin:8px 0 0; font-weight:500; text-wrap:pretty;">認証失敗の約8割はパスワード失念とキャッシュ不整合。エラー表示の有無を最初に確認すれば2手で切り分く。</p>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px; margin-top:18px;">
+              <span style="font-size:13px; font-weight:700; color:#18181B;">専門家の思考プロセス</span>
+              <span style="font-size:11px; color:#A1A1AA; font-family:'IBM Plex Mono',monospace;">判断木</span>
+            </div>
+            <div style="margin-top:10px; border:1px solid #E6E6E9; border-radius:12px; overflow:hidden; height:288px; position:relative; background:#FAFAFA;">
+              <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0.555);">
+                <dc-import name="ThinkTree" hint-size="720px,500px"></dc-import>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; padding:15px 20px; border-top:1px solid #ECECEE;">
+            <button style="flex:1; font-family:inherit; font-size:13px; font-weight:600; color:#3F3F46; background:#fff; border:1px solid #E4E4E7; border-radius:9px; padding:10px; cursor:pointer;">標準回答を編集</button>
+            <button style="flex:1; font-family:inherit; font-size:13px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:9px; padding:10px; cursor:pointer;">このFAQを承認</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const fit = () => {
+      document.querySelectorAll('[data-frame]').forEach((f) => {
+        f.style.transform = 'none';
+        const natW = f.offsetWidth;
+        const natH = f.offsetHeight;
+        let avail = natW;
+        if (f.parentElement) {
+          const pcs = getComputedStyle(f.parentElement);
+          const pad = parseFloat(pcs.paddingLeft || 0) + parseFloat(pcs.paddingRight || 0);
+          avail = f.parentElement.clientWidth - pad - 4;
+        }
+        const s = Math.min(1, avail / natW);
+        f.style.transformOrigin = 'top left';
+        f.style.transform = 'scale(' + s + ')';
+        f.style.marginBottom = (-(natH * (1 - s))) + 'px';
+      });
+    };
+    this._fit = fit;
+    fit();
+    window.addEventListener('resize', fit);
+    [120, 400, 900, 1600].forEach((t) => setTimeout(fit, t));
+  }
+  componentWillUnmount() {
+    if (this._fit) window.removeEventListener('resize', this._fit);
+  }
+}
+</script>
+</body>
+</html>

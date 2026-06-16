@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; }
+  @keyframes msgIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  @keyframes nodePulse { 0%,100% { box-shadow:0 0 0 4px rgba(79,70,229,.16), 0 6px 18px -6px rgba(79,70,229,.45); } 50% { box-shadow:0 0 0 7px rgba(79,70,229,.08), 0 6px 18px -6px rgba(79,70,229,.5); } }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes barflow { 0% { transform:translateX(-100%); } 100% { transform:translateX(320%); } }
+  *::-webkit-scrollbar { width:9px; height:9px; }
+  *::-webkit-scrollbar-thumb { background:#D4D4D8; border-radius:6px; border:2px solid transparent; background-clip:padding-box; }
+</style>
+</helmet>
+<div style="background:#E9E9EC; min-height:100vh; padding:32px 0 60px; font-family:'IBM Plex Sans JP',system-ui,sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; display:flex; justify-content:center;">
+  <div data-frame style="width:1340px; height:854px; background:#fff; border:1px solid #E2E2E6; border-radius:18px; box-shadow:0 24px 60px -24px rgba(24,24,27,.28); overflow:hidden; display:flex;">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside style="width:216px; box-sizing:border-box; border-right:1px solid #ECECEE; background:#FCFCFD; display:flex; flex-direction:column; padding:18px 14px;">
+      <div style="display:flex; align-items:center; gap:9px; padding:4px 6px 18px;">
+        <div style="width:26px; height:26px; border-radius:8px; background:#4F46E5; color:#fff; font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center;">D</div>
+        <span style="font-size:16px; font-weight:700; color:#18181B; letter-spacing:-0.01em;">Distill</span>
+      </div>
+
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; color:#A1A1AA; font-weight:600; padding:6px 8px 8px;">WORKSPACE</div>
+      <div style="display:flex; flex-direction:column; gap:3px;">
+        <div style="{{ navAnswer }}" onClick="{{ goAnswer }}">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          回答アシスタント
+        </div>
+        <div style="{{ navImport }}" onClick="{{ goImport }}">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+          CSV取り込み
+        </div>
+        <div style="{{ navMaps }}" onClick="{{ goMaps }}">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="6" cy="6" r="2.4"></circle><circle cx="18" cy="6" r="2.4"></circle><circle cx="12" cy="18" r="2.4"></circle><path d="M8 7l3 9M16 7l-3 9"></path></svg>
+          マインドマップ
+        </div>
+      </div>
+
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; color:#A1A1AA; font-weight:600; padding:22px 8px 8px;">マップ</div>
+      <div style="display:flex; flex-direction:column; gap:2px; font-size:12.5px;">
+        <div style="display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:8px; color:#3F3F46;"><span style="width:8px;height:8px;border-radius:50%;background:#4F46E5;"></span>ログイン・認証<span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">412</span></div>
+        <div style="display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:8px; color:#3F3F46;"><span style="width:8px;height:8px;border-radius:50%;background:#D08A1E;"></span>請求・課金<span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">287</span></div>
+        <div style="display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:8px; color:#3F3F46;"><span style="width:8px;height:8px;border-radius:50%;background:#1C9C6B;"></span>データ同期<span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">203</span></div>
+      </div>
+
+      <div style="margin-top:auto; display:flex; align-items:center; gap:9px; padding:10px 8px; border-top:1px solid #F0F0F2;">
+        <div style="width:28px; height:28px; border-radius:50%; background:#E4E4E7; border:1px solid #DADADE;"></div>
+        <div style="line-height:1.3;"><div style="font-size:12px; font-weight:600; color:#27272A;">CS チーム</div><div style="font-size:10.5px; color:#A1A1AA;">サポートログ Q2</div></div>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main style="flex:1; min-width:0; display:flex; flex-direction:column;">
+
+      <!-- ANSWER VIEW -->
+      <sc-if value="{{ isAnswer }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; height:854px;">
+        <!-- header -->
+        <div style="height:65px; box-sizing:border-box; border-bottom:1px solid #ECECEE; display:flex; align-items:center; padding:0 24px; gap:14px;">
+          <div>
+            <div style="font-size:16px; font-weight:700; color:#18181B;">回答アシスタント</div>
+            <div style="font-size:12px; color:#A1A1AA; margin-top:1px;">マインドマップを辿って、根本原因と回答案を導きます</div>
+          </div>
+          <sc-if value="{{ matched }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+              <span style="display:inline-flex; align-items:center; gap:7px; font-size:12px; color:#4338CA; background:#EEF0FF; border:1px solid #DDE1FF; border-radius:999px; padding:5px 12px;"><span style="width:7px;height:7px;border-radius:50%;background:#4F46E5;"></span>ログイン・認証 マップ · 一致 96%</span>
+              <button onClick="{{ reset }}" style="font-family:inherit; font-size:12.5px; font-weight:600; color:#52525B; background:#fff; border:1px solid #E4E4E7; border-radius:9px; padding:7px 13px; cursor:pointer;">別の質問</button>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- split -->
+        <div style="flex:1; display:flex; min-height:0;">
+
+          <!-- chat column -->
+          <div style="width:432px; box-sizing:border-box; border-right:1px solid #ECECEE; display:flex; flex-direction:column; min-height:0;">
+            <div id="chatScroll" style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:14px;">
+
+              <sc-if value="{{ showStart }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; gap:9px; align-items:flex-start; animation:msgIn .3s ease;">
+                  <div style="width:26px; height:26px; flex:none; border-radius:50%; background:#4F46E5; color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;">D</div>
+                  <div style="background:#F4F4F5; color:#27272A; border-radius:4px 14px 14px 14px; padding:11px 14px; font-size:13px; line-height:1.65; max-width:300px;">サポートに届いた質問を入力してください。<strong style="font-weight:600;">「ログイン・認証」マップ</strong>を辿って、根本原因と回答案をご提案します。</div>
+                </div>
+                <div style="padding-left:35px; display:flex; flex-direction:column; gap:7px;">
+                  <div style="font-size:11px; color:#A1A1AA; font-family:'IBM Plex Mono',monospace;">サンプル質問</div>
+                  <sc-for list="{{ samples }}" as="s" hint-placeholder-count="3">
+                    <div onClick="{{ s.onClick }}" style="font-size:12.5px; color:#3F3F46; background:#fff; border:1px solid #E4E4E7; border-radius:10px; padding:9px 12px; cursor:pointer; line-height:1.4;" style-hover="border-color:#C7D2FE; background:#F8F9FF;">{{ s.text }}</div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-for list="{{ messages }}" as="m" hint-placeholder-count="0">
+                <sc-if value="{{ m.isUser }}">
+                  <div style="display:flex; justify-content:flex-end; animation:msgIn .3s ease;">
+                    <div style="background:#4F46E5; color:#fff; border-radius:14px 4px 14px 14px; padding:10px 14px; font-size:13px; line-height:1.55; max-width:280px;">{{ m.text }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ m.isBotText }}">
+                  <div style="display:flex; gap:9px; align-items:flex-start; animation:msgIn .3s ease;">
+                    <div style="width:26px; height:26px; flex:none; border-radius:50%; background:#4F46E5; color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;">D</div>
+                    <div style="background:#F4F4F5; color:#27272A; border-radius:4px 14px 14px 14px; padding:11px 14px; font-size:13px; line-height:1.6; max-width:300px;">{{ m.text }}</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ m.isAnswer }}">
+                  <div style="display:flex; gap:9px; align-items:flex-start; animation:msgIn .35s ease;">
+                    <div style="width:26px; height:26px; flex:none; border-radius:50%; background:#4F46E5; color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;">D</div>
+                    <div style="flex:1; background:#fff; border:1px solid #DDE1FF; border-radius:4px 14px 14px 14px; overflow:hidden;">
+                      <div style="background:#F5F6FF; padding:11px 14px; border-bottom:1px solid #E7E9FF;">
+                        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#6366F1; font-weight:600;">根本原因 / ROOT CAUSE</div>
+                        <div style="font-size:14px; font-weight:700; color:#312E81; margin-top:4px;">{{ m.cause }}</div>
+                      </div>
+                      <div style="padding:12px 14px;">
+                        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#A1A1AA; letter-spacing:.04em;">回答案</div>
+                        <p style="font-size:12.5px; line-height:1.7; color:#3F3F46; margin:6px 0 0; text-wrap:pretty;">{{ m.answer }}</p>
+                        <div style="display:flex; gap:8px; margin-top:12px;">
+                          <button style="font-family:inherit; font-size:12px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:8px; padding:7px 13px; cursor:pointer;">回答をコピー</button>
+                          <button style="font-family:inherit; font-size:12px; font-weight:600; color:#52525B; background:#fff; border:1px solid #E4E4E7; border-radius:8px; padding:7px 13px; cursor:pointer;">テンプレに保存</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+              </sc-for>
+
+            </div>
+
+            <!-- composer -->
+            <div style="border-top:1px solid #ECECEE; padding:14px 18px;">
+              <sc-if value="{{ awaiting }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <div style="font-size:11px; color:#A1A1AA; text-align:center; margin-bottom:9px;">この質問に回答してください</div>
+                  <div style="display:flex; gap:10px;">
+                    <button onClick="{{ onYes }}" style="flex:1; font-family:inherit; font-size:14px; font-weight:700; color:#1C6B4F; background:#E7F4EE; border:1px solid #C7E6D7; border-radius:11px; padding:13px; cursor:pointer;" style-hover="background:#DCEFE5;">はい</button>
+                    <button onClick="{{ onNo }}" style="flex:1; font-family:inherit; font-size:14px; font-weight:700; color:#52525B; background:#F4F4F5; border:1px solid #E4E4E7; border-radius:11px; padding:13px; cursor:pointer;" style-hover="background:#EDEDEE;">いいえ</button>
+                  </div>
+                  <div onClick="{{ reset }}" style="text-align:center; font-size:11.5px; color:#A1A1AA; margin-top:10px; cursor:pointer;">最初からやり直す</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ notAwaiting }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; gap:9px; align-items:center; background:#F6F6F7; border:1px solid #ECECEE; border-radius:12px; padding:7px 8px 7px 14px;">
+                  <input value="{{ query }}" onInput="{{ onQueryInput }}" onKeyDown="{{ onQueryKey }}" placeholder="サポートに来た質問を入力…" style="flex:1; border:none; background:transparent; outline:none; font-family:inherit; font-size:13px; color:#27272A;">
+                  <button onClick="{{ onSend }}" style="flex:none; font-family:inherit; width:34px; height:34px; border-radius:9px; border:none; background:#4F46E5; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"></path></svg>
+                  </button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+
+          <!-- tree panel -->
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column; background:#F4F4F7;">
+            <div style="display:flex; align-items:center; gap:12px; padding:14px 22px;">
+              <span style="font-size:13px; font-weight:700; color:#27272A;">思考プロセス</span>
+              <span style="font-size:11.5px; color:#8A8A93; font-family:'IBM Plex Mono',monospace;">{{ treeStatus }}</span>
+              <div style="margin-left:auto; display:flex; align-items:center; gap:14px; font-size:10.5px; color:#71717A;">
+                <span style="display:inline-flex; align-items:center; gap:5px;"><span style="width:9px;height:9px;border-radius:50%;border:2px solid #4F46E5;"></span>現在地</span>
+                <span style="display:inline-flex; align-items:center; gap:5px;"><span style="width:14px;height:3px;border-radius:2px;background:#4F46E5;"></span>辿った経路</span>
+              </div>
+            </div>
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:0 18px 18px; min-height:0; overflow:hidden;">
+              <div style="transform:scale(0.86); transform-origin:center;">{{ treeEl }}</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- IMPORT VIEW -->
+      <sc-if value="{{ isImport }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; height:854px;">
+        <!-- header -->
+        <div style="height:65px; box-sizing:border-box; border-bottom:1px solid #ECECEE; display:flex; align-items:center; padding:0 24px;">
+          <div><div style="font-size:16px; font-weight:700; color:#18181B;">CSV取り込み</div><div style="font-size:12px; color:#A1A1AA; margin-top:1px;">サポートのQ&amp;Aログを取り込み、マインドマップへ振り分けます</div></div>
+        </div>
+
+        <!-- stepper -->
+        <div style="border-bottom:1px solid #ECECEE; padding:14px 24px; display:flex; align-items:center; gap:12px;">
+          <sc-for list="{{ stepsView }}" as="st" hint-placeholder-count="4">
+            <div style="display:flex; align-items:center; gap:9px;">
+              <sc-if value="{{ st.done }}">
+                <div style="width:24px; height:24px; border-radius:50%; background:#4F46E5; color:#fff; display:flex; align-items:center; justify-content:center; flex:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"></path></svg></div>
+                <span style="font-size:13px; font-weight:600; color:#27272A;">{{ st.label }}</span>
+              </sc-if>
+              <sc-if value="{{ st.now }}">
+                <div style="width:24px; height:24px; border-radius:50%; background:#EEF0FF; border:2px solid #4F46E5; color:#4338CA; display:flex; align-items:center; justify-content:center; flex:none; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600;">{{ st.num }}</div>
+                <span style="font-size:13px; font-weight:600; color:#27272A;">{{ st.label }}</span>
+              </sc-if>
+              <sc-if value="{{ st.todo }}">
+                <div style="width:24px; height:24px; border-radius:50%; background:#fff; border:1.5px solid #D4D4D8; color:#A1A1AA; display:flex; align-items:center; justify-content:center; flex:none; font-family:'IBM Plex Mono',monospace; font-size:11px;">{{ st.num }}</div>
+                <span style="font-size:13px; font-weight:500; color:#A1A1AA;">{{ st.label }}</span>
+              </sc-if>
+              <sc-if value="{{ st.notLast }}"><span style="width:42px; height:2px; background:#E4E4E7; border-radius:2px; margin:0 4px;"></span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- content -->
+        <div style="flex:1; overflow-y:auto; background:#FBFBFC; min-height:0;">
+
+          <!-- STEP 0: upload -->
+          <sc-if value="{{ isStep0 }}">
+            <div style="max-width:560px; margin:54px auto 0; padding:0 24px;">
+              <div style="background:#fff; border:1.5px dashed #C9C9CE; border-radius:18px; padding:48px 32px; text-align:center;">
+                <div style="width:52px; height:52px; margin:0 auto; border-radius:14px; background:#EEF0FF; color:#4F46E5; display:flex; align-items:center; justify-content:center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v12"></path></svg></div>
+                <div style="font-size:15px; font-weight:600; color:#27272A; margin-top:16px;">CSVファイルをドラッグ＆ドロップ</div>
+                <div style="font-size:12.5px; color:#A1A1AA; margin-top:6px;">またはクリックしてファイルを選択</div>
+                <button onClick="{{ pickFile }}" style="margin-top:18px; font-family:inherit; font-size:13px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:10px; padding:10px 20px; cursor:pointer;">ファイルを選択</button>
+                <div style="font-size:11px; color:#C4C4C9; margin-top:18px; font-family:'IBM Plex Mono',monospace;">Q&amp;Aのペアを含むCSV · UTF-8 · 最大 10MB</div>
+              </div>
+              <div style="text-align:center; margin-top:18px;"><span onClick="{{ pickFile }}" style="font-size:13px; color:#4F46E5; font-weight:600; cursor:pointer;">サンプルCSV（support_qa_2024Q2.csv）で試す →</span></div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 1: mapping -->
+          <sc-if value="{{ isStep1 }}">
+            <div style="max-width:740px; margin:28px auto; padding:0 24px;">
+              <div style="display:flex; align-items:center; gap:11px; background:#fff; border:1px solid #ECECEE; border-radius:12px; padding:12px 14px;">
+                <div style="width:34px; height:34px; border-radius:9px; background:#E7F4EE; color:#1C6B4F; display:flex; align-items:center; justify-content:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg></div>
+                <div><div style="font-size:13.5px; font-weight:600; color:#27272A;">support_qa_2024Q2.csv</div><div style="font-size:11px; color:#A1A1AA; font-family:'IBM Plex Mono',monospace; margin-top:2px;">3,482 行 · 6 列 · 1.8 MB</div></div>
+                <span style="margin-left:auto; font-size:11.5px; color:#1C6B4F; background:#E7F4EE; border-radius:6px; padding:3px 9px; font-weight:600;">読み込み完了</span>
+              </div>
+
+              <div style="margin-top:22px;">
+                <div style="font-size:14px; font-weight:700; color:#18181B;">列のマッピング</div>
+                <div style="font-size:12.5px; color:#71717A; margin-top:4px;">AIが各列の役割を自動判定しました。必要に応じて変更してください。</div>
+              </div>
+
+              <div style="display:flex; gap:12px; margin-top:16px;">
+                <div style="flex:1;">
+                  <div style="font-size:11px; color:#71717A; margin-bottom:6px; font-weight:600;">質問（Q）<span style="color:#EF4444;">*</span></div>
+                  <div style="display:flex; align-items:center; background:#fff; border:1.5px solid #C7D2FE; border-radius:9px; padding:9px 12px; font-size:12.5px; color:#312E81; font-family:'IBM Plex Mono',monospace;">customer_message<span style="margin-left:auto; color:#A1A1AA;">▾</span></div>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:11px; color:#71717A; margin-bottom:6px; font-weight:600;">回答（A）<span style="color:#EF4444;">*</span></div>
+                  <div style="display:flex; align-items:center; background:#fff; border:1.5px solid #C7D2FE; border-radius:9px; padding:9px 12px; font-size:12.5px; color:#312E81; font-family:'IBM Plex Mono',monospace;">agent_reply<span style="margin-left:auto; color:#A1A1AA;">▾</span></div>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:11px; color:#71717A; margin-bottom:6px; font-weight:600;">カテゴリ（任意）</div>
+                  <div style="display:flex; align-items:center; background:#fff; border:1px solid #E4E4E7; border-radius:9px; padding:9px 12px; font-size:12.5px; color:#52525B; font-family:'IBM Plex Mono',monospace;">category<span style="margin-left:auto; color:#A1A1AA;">▾</span></div>
+                </div>
+              </div>
+
+              <div style="margin-top:22px; background:#fff; border:1px solid #ECECEE; border-radius:12px; overflow:hidden;">
+                <div style="display:grid; grid-template-columns:96px 64px minmax(0,1.4fr) minmax(0,1.4fr) 70px 50px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#A1A1AA; background:#FBFBFC; border-bottom:1px solid #ECECEE; padding:8px 12px; gap:8px;">
+                  <span>created_at</span><span>channel</span><span style="color:#4338CA;">customer_message</span><span style="color:#4338CA;">agent_reply</span><span>category</span><span>csat</span>
+                </div>
+                <div style="display:grid; grid-template-columns:96px 64px minmax(0,1.4fr) minmax(0,1.4fr) 70px 50px; font-size:11px; color:#52525B; padding:9px 12px; gap:8px; border-bottom:1px solid #F4F4F5; align-items:center;">
+                  <span style="font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">04-02</span><span>chat</span><span style="color:#27272A; background:#F5F6FF; border-radius:4px; padding:2px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">パスワードが通りません</span><span style="background:#F5F6FF; border-radius:4px; padding:2px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">リセット手順をご案内します</span><span>認証</span><span style="font-family:'IBM Plex Mono',monospace;">4</span>
+                </div>
+                <div style="display:grid; grid-template-columns:96px 64px minmax(0,1.4fr) minmax(0,1.4fr) 70px 50px; font-size:11px; color:#52525B; padding:9px 12px; gap:8px; border-bottom:1px solid #F4F4F5; align-items:center;">
+                  <span style="font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">04-02</span><span>email</span><span style="color:#27272A; background:#F5F6FF; border-radius:4px; padding:2px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">請求額が高い気がします</span><span style="background:#F5F6FF; border-radius:4px; padding:2px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">ご利用明細を確認しました</span><span>課金</span><span style="font-family:'IBM Plex Mono',monospace;">3</span>
+                </div>
+                <div style="display:grid; grid-template-columns:96px 64px minmax(0,1.4fr) minmax(0,1.4fr) 70px 50px; font-size:11px; color:#52525B; padding:9px 12px; gap:8px; align-items:center;">
+                  <span style="font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">04-03</span><span>chat</span><span style="color:#27272A; background:#F5F6FF; border-radius:4px; padding:2px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">画面が真っ白で進めない</span><span style="background:#F5F6FF; border-radius:4px; padding:2px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">キャッシュ削除をご案内</span><span>認証</span><span style="font-family:'IBM Plex Mono',monospace;">5</span>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:10px; margin-top:22px;">
+                <button onClick="{{ backTo0 }}" style="font-family:inherit; font-size:13px; font-weight:600; color:#52525B; background:#fff; border:1px solid #E4E4E7; border-radius:10px; padding:10px 18px; cursor:pointer;">戻る</button>
+                <button onClick="{{ toPreview }}" style="margin-left:auto; font-family:inherit; font-size:13px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:10px; padding:10px 20px; cursor:pointer;">プレビューへ進む</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 2: preview & settings -->
+          <sc-if value="{{ isStep2 }}">
+            <div style="max-width:880px; margin:28px auto; padding:0 24px; display:flex; gap:20px;">
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:14px; font-weight:700; color:#18181B;">抽出対象のプレビュー</div>
+                <div style="font-size:12px; color:#71717A; margin-top:3px;">マッピング結果のQ&amp;Aペア</div>
+                <div style="margin-top:14px; background:#fff; border:1px solid #ECECEE; border-radius:12px; overflow:hidden;">
+                  <div style="display:grid; grid-template-columns:34px 1fr 1fr; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#A1A1AA; background:#FBFBFC; border-bottom:1px solid #ECECEE; padding:8px 12px; gap:10px;"><span>#</span><span>質問</span><span>回答</span></div>
+                  <div style="display:grid; grid-template-columns:34px 1fr 1fr; font-size:11.5px; color:#3F3F46; padding:10px 12px; gap:10px; border-bottom:1px solid #F4F4F5; line-height:1.45;"><span style="font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">1</span><span>パスワードが通りません</span><span style="color:#71717A;">リセット手順をご案内します…</span></div>
+                  <div style="display:grid; grid-template-columns:34px 1fr 1fr; font-size:11.5px; color:#3F3F46; padding:10px 12px; gap:10px; border-bottom:1px solid #F4F4F5; line-height:1.45;"><span style="font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">2</span><span>請求額が高い気がします</span><span style="color:#71717A;">ご利用明細を確認しました…</span></div>
+                  <div style="display:grid; grid-template-columns:34px 1fr 1fr; font-size:11.5px; color:#3F3F46; padding:10px 12px; gap:10px; border-bottom:1px solid #F4F4F5; line-height:1.45;"><span style="font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">3</span><span>画面が真っ白で進めない</span><span style="color:#71717A;">キャッシュ削除をご案内…</span></div>
+                  <div style="display:grid; grid-template-columns:34px 1fr 1fr; font-size:11.5px; color:#3F3F46; padding:10px 12px; gap:10px; border-bottom:1px solid #F4F4F5; line-height:1.45;"><span style="font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">4</span><span>2段階認証コードが届かない</span><span style="color:#71717A;">SMS再送をお試しください…</span></div>
+                  <div style="display:grid; grid-template-columns:34px 1fr 1fr; font-size:11.5px; color:#3F3F46; padding:10px 12px; gap:10px; line-height:1.45;"><span style="font-family:'IBM Plex Mono',monospace; color:#A1A1AA;">5</span><span>Webhookが発火しません</span><span style="color:#71717A;">配信ログをご確認ください…</span></div>
+                  <div style="padding:9px 12px; background:#FBFBFC; border-top:1px solid #ECECEE; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#A1A1AA;">3,482 組のQ&amp;Aペア</div>
+                </div>
+              </div>
+
+              <div style="width:288px; flex:none;">
+                <div style="font-size:14px; font-weight:700; color:#18181B;">抽出設定</div>
+                <div style="font-size:12px; color:#71717A; margin-top:3px;">LLMでの抽象化・クラスタリング</div>
+                <div style="margin-top:14px; background:#fff; border:1px solid #ECECEE; border-radius:12px; padding:15px;">
+                  <div style="font-size:12px; font-weight:600; color:#3F3F46;">抽象化レベル</div>
+                  <div style="display:flex; background:#F4F4F5; border-radius:9px; padding:3px; margin-top:8px;">
+                    <span style="flex:1; text-align:center; font-size:12px; color:#52525B; padding:6px; border-radius:7px;">低</span>
+                    <span style="flex:1; text-align:center; font-size:12px; font-weight:600; color:#18181B; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.06); padding:6px; border-radius:7px;">中</span>
+                    <span style="flex:1; text-align:center; font-size:12px; color:#52525B; padding:6px; border-radius:7px;">高</span>
+                  </div>
+                  <div style="font-size:10.5px; color:#A1A1AA; margin-top:7px; line-height:1.5;">「中」: 個別の言い回しをまとめ、本質的な論点でグループ化します。</div>
+
+                  <div style="display:flex; align-items:center; margin-top:18px;"><span style="font-size:12px; font-weight:600; color:#3F3F46;">クラスタリングしきい値</span><span style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:12px; color:#4F46E5;">0.72</span></div>
+                  <div style="height:5px; background:#E4E4E7; border-radius:3px; margin-top:10px; position:relative;"><div style="width:72%; height:100%; background:#4F46E5; border-radius:3px;"></div><div style="position:absolute; left:72%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:#fff; border:2px solid #4F46E5; box-shadow:0 1px 3px rgba(0,0,0,.15);"></div></div>
+
+                  <div style="display:flex; align-items:center; margin-top:20px; padding-top:14px; border-top:1px solid #F0F0F2;"><span style="font-size:12px; color:#3F3F46;">既存マップへの統合を試みる</span><span style="margin-left:auto; width:34px; height:20px; border-radius:999px; background:#4F46E5; position:relative;"><span style="position:absolute; right:2px; top:2px; width:16px; height:16px; border-radius:50%; background:#fff;"></span></span></div>
+                  <div style="display:flex; align-items:center; margin-top:12px;"><span style="font-size:12px; color:#3F3F46;">重複Q&amp;Aを除外</span><span style="margin-left:auto; width:34px; height:20px; border-radius:999px; background:#4F46E5; position:relative;"><span style="position:absolute; right:2px; top:2px; width:16px; height:16px; border-radius:50%; background:#fff;"></span></span></div>
+                </div>
+                <button onClick="{{ startExtract }}" style="width:100%; margin-top:14px; font-family:inherit; font-size:13.5px; font-weight:700; color:#fff; background:#4F46E5; border:none; border-radius:11px; padding:12px; cursor:pointer;">抽出を開始</button>
+                <button onClick="{{ backTo1 }}" style="width:100%; margin-top:8px; font-family:inherit; font-size:12.5px; font-weight:600; color:#52525B; background:transparent; border:none; padding:6px; cursor:pointer;">戻る</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- PROCESSING -->
+          <sc-if value="{{ isProcessing }}">
+            <div style="max-width:420px; margin:120px auto 0; text-align:center; padding:0 24px;">
+              <div style="width:46px; height:46px; margin:0 auto; border-radius:50%; border:3px solid #E4E7FF; border-top-color:#4F46E5; animation:spin .8s linear infinite;"></div>
+              <div style="font-size:15px; font-weight:600; color:#27272A; margin-top:20px;">AIがQ&amp;Aを解析しています</div>
+              <div style="font-size:12.5px; color:#A1A1AA; margin-top:6px;">3,482件をクラスタリング・抽象化し、既存マップと照合中…</div>
+              <div style="height:6px; background:#EEF0FF; border-radius:4px; margin-top:22px; overflow:hidden; position:relative;"><div style="position:absolute; top:0; left:0; width:30%; height:100%; background:#4F46E5; border-radius:4px; animation:barflow 1.2s ease-in-out infinite;"></div></div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 3: routing -->
+          <sc-if value="{{ isStep3 }}">
+            <div style="max-width:820px; margin:26px auto; padding:0 24px;">
+              <div style="display:flex; align-items:flex-end; gap:14px;">
+                <div>
+                  <div style="font-size:15px; font-weight:700; color:#18181B;">AIによる振り分け提案</div>
+                  <div style="font-size:12.5px; color:#71717A; margin-top:4px; max-width:520px; line-height:1.6;">新しく抽出した5件のクラスタについて、<strong style="font-weight:600;">既存マップへ追加</strong>するか<strong style="font-weight:600;">新規作成</strong>するかをAIが提案しました。1件ずつ確認・承認してください。</div>
+                </div>
+                <span style="margin-left:auto; flex:none; font-size:12px; font-family:'IBM Plex Mono',monospace; color:#4338CA; background:#EEF0FF; border:1px solid #DDE1FF; border-radius:999px; padding:5px 12px;">{{ routeProgress }}</span>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:12px; margin-top:18px;">
+                <sc-for list="{{ routesView }}" as="r" hint-placeholder-count="5">
+                  <div style="background:#fff; border:1px solid #E6E6E9; border-radius:13px; padding:15px 17px;">
+                    <div style="display:flex; align-items:flex-start; gap:10px;">
+                      <div style="flex:1; min-width:0;">
+                        <div style="display:flex; align-items:center; gap:9px;">
+                          <span style="font-size:13.5px; font-weight:700; color:#18181B;">{{ r.title }}</span>
+                          <span style="font-size:10.5px; font-family:'IBM Plex Mono',monospace; color:#71717A; background:#F4F4F5; border-radius:5px; padding:2px 7px;">{{ r.size }}件</span>
+                        </div>
+                        <div style="font-size:11.5px; color:#A1A1AA; margin-top:5px;">例：「{{ r.sample }}」</div>
+                      </div>
+                      <sc-if value="{{ r.isApproved }}"><span style="flex:none; display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600; color:#1C6B4F; background:#E7F4EE; border:1px solid #C7E6D7; border-radius:999px; padding:4px 10px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C6B4F" stroke-width="3"><path d="M20 6L9 17l-5-5"></path></svg>承認済み</span></sc-if>
+                    </div>
+
+                    <div style="margin-top:13px; padding:12px 13px; border-radius:10px; background:#FBFBFC; border:1px solid #F0F0F2;">
+                      <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap;">
+                        <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.05em; color:#8A8A93; font-weight:600;">AI提案</span>
+                        <sc-if value="{{ r.isAppend }}">
+                          <span style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#4338CA; background:#EEF0FF; border:1px solid #DDE1FF; border-radius:7px; padding:4px 10px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>既存マップに追加</span>
+                          <span style="font-size:12.5px; color:#312E81; font-weight:600;">{{ r.target }}</span>
+                        </sc-if>
+                        <sc-if value="{{ r.isNew }}">
+                          <span style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#1C6B4F; background:#E7F4EE; border:1px solid #C7E6D7; border-radius:7px; padding:4px 10px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1C6B4F" stroke-width="2"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7l-2-2H5a2 2 0 0 0-2 2z"></path></svg>新規マップを作成</span>
+                          <span style="font-size:12.5px; color:#1C6B4F; font-weight:600;">「{{ r.target }}」</span>
+                        </sc-if>
+                        <span style="margin-left:auto; font-size:11px; font-family:'IBM Plex Mono',monospace; color:#71717A;">信頼度 {{ r.conf }}%</span>
+                      </div>
+                      <div style="font-size:11.5px; color:#71717A; line-height:1.6; margin-top:9px;">{{ r.reason }}</div>
+                    </div>
+
+                    <sc-if value="{{ r.isPending }}">
+                      <div style="display:flex; gap:9px; margin-top:13px;">
+                        <button onClick="{{ r.onApprove }}" style="font-family:inherit; font-size:12.5px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:9px; padding:8px 16px; cursor:pointer;">この提案で承認</button>
+                        <button onClick="{{ r.onToggle }}" style="font-family:inherit; font-size:12.5px; font-weight:600; color:#52525B; background:#fff; border:1px solid #E4E4E7; border-radius:9px; padding:8px 16px; cursor:pointer;">追加／新規を切替</button>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="margin-top:20px;">
+                <sc-if value="{{ allApproved }}">
+                  <button onClick="{{ finishImport }}" style="width:100%; font-family:inherit; font-size:14px; font-weight:700; color:#fff; background:#4F46E5; border:none; border-radius:12px; padding:13px; cursor:pointer;">取り込みを完了する</button>
+                </sc-if>
+                <sc-if value="{{ notAllApproved }}">
+                  <div style="text-align:center; font-size:12px; color:#A1A1AA; padding:10px;">すべてのクラスタを承認すると取り込みを完了できます</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 4: done -->
+          <sc-if value="{{ isStep4 }}">
+            <div style="max-width:480px; margin:80px auto 0; text-align:center; padding:0 24px;">
+              <div style="width:60px; height:60px; margin:0 auto; border-radius:50%; background:#E7F4EE; color:#1C6B4F; display:flex; align-items:center; justify-content:center;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1C9C6B" stroke-width="2.6"><path d="M20 6L9 17l-5-5"></path></svg></div>
+              <div style="font-size:19px; font-weight:700; color:#18181B; margin-top:18px;">取り込みが完了しました</div>
+              <div style="font-size:13px; color:#71717A; margin-top:8px; line-height:1.6;">新しいQ&amp;Aクラスタをマインドマップに反映しました。回答アシスタントから利用できます。</div>
+              <div style="display:flex; gap:12px; margin-top:24px; justify-content:center;">
+                <div style="background:#fff; border:1px solid #ECECEE; border-radius:12px; padding:14px 22px;"><div style="font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:#4F46E5;">{{ appendCount }}</div><div style="font-size:11px; color:#A1A1AA; margin-top:2px;">既存へ追加</div></div>
+                <div style="background:#fff; border:1px solid #ECECEE; border-radius:12px; padding:14px 22px;"><div style="font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:#1C9C6B;">{{ newCount }}</div><div style="font-size:11px; color:#A1A1AA; margin-top:2px;">新規マップ</div></div>
+                <div style="background:#fff; border:1px solid #ECECEE; border-radius:12px; padding:14px 22px;"><div style="font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:#18181B;">{{ totalQ }}</div><div style="font-size:11px; color:#A1A1AA; margin-top:2px;">反映Q&amp;A</div></div>
+              </div>
+              <div style="display:flex; gap:10px; margin-top:26px; justify-content:center;">
+                <button onClick="{{ goMaps }}" style="font-family:inherit; font-size:13px; font-weight:600; color:#fff; background:#4F46E5; border:none; border-radius:10px; padding:10px 18px; cursor:pointer;">マップを見る</button>
+                <button onClick="{{ goAnswer }}" style="font-family:inherit; font-size:13px; font-weight:600; color:#3F3F46; background:#fff; border:1px solid #E4E4E7; border-radius:10px; padding:10px 18px; cursor:pointer;">回答アシスタントを試す</button>
+                <button onClick="{{ resetImport }}" style="font-family:inherit; font-size:13px; font-weight:600; color:#52525B; background:transparent; border:none; padding:10px; cursor:pointer;">別のCSVを取り込む</button>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- MAPS VIEW -->
+      <sc-if value="{{ isMaps }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; height:854px;">
+          <div style="height:65px; box-sizing:border-box; border-bottom:1px solid #ECECEE; display:flex; align-items:center; padding:0 24px;">
+            <div><div style="font-size:16px; font-weight:700; color:#18181B;">マインドマップ：ログイン・認証</div><div style="font-size:12px; color:#A1A1AA; margin-top:1px;">412件のQ&amp;Aから生成された判断木</div></div>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; background:#F4F4F7; padding:24px; min-height:0;">
+            <div style="transform:scale(1.05); transform-origin:center;">{{ treeEl }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.TREE = {
+      nodes: [
+        { id:'root', x:6,   y:220, w:150, kind:'症状', title:'ログインできない' },
+        { id:'q1',   x:184, y:222, w:156, kind:'判断 01', title:'エラーメッセージが表示される？' },
+        { id:'q2',   x:366, y:92,  w:158, kind:'判断 02', title:'「パスワードが正しくありません」？' },
+        { id:'q3',   x:366, y:360, w:158, kind:'判断 02', title:'画面が読み込まれない？' },
+        { id:'l1',   x:552, y:36,  w:162, kind:'根本原因', tone:'amber', title:'パスワード失念', sub:'→ リセットメールを案内',
+          answer:'パスワードをお忘れの可能性が高いです。サインイン画面の「パスワードを忘れた方」からリセット用メールを送信いただくよう案内してください。届かない場合は迷惑メールフォルダと、登録メールアドレスをご確認ください。' },
+        { id:'l2',   x:552, y:140, w:162, kind:'根本原因', tone:'amber', title:'アカウントロック', sub:'→ 30分待機・手動解除',
+          answer:'試行回数の超過による一時ロックです。30分ほど待ってから再試行いただくか、お急ぎの場合は管理コンソールの「ユーザー管理」から手動でロックを解除してください。' },
+        { id:'l3',   x:552, y:310, w:162, kind:'根本原因', tone:'green', title:'キャッシュ／Cookie不整合', sub:'→ シークレットW・再読込',
+          answer:'ブラウザのキャッシュ／Cookieが原因の可能性が高いです。シークレット（プライベート）ウィンドウでの再試行、または該当サイトのキャッシュ削除をご案内ください。' },
+        { id:'l4',   x:552, y:414, w:162, kind:'根本原因', tone:'red', title:'SSO／IdP障害', sub:'→ 管理者へエスカレーション',
+          answer:'SSO／IdP（連携先）側の障害が疑われます。同時刻に複数ユーザーで発生していないかを確認し、該当する場合は社内管理者へエスカレーションのうえ、IdPのステータスページをご確認ください。' }
+      ],
+      edges: [
+        { from:'root', to:'q1', d:'M156 248 L184 248' },
+        { from:'q1', to:'q2', label:'はい',  lx:344, ly:160, d:'M340 248 C 362 248, 344 118, 366 118' },
+        { from:'q1', to:'q3', label:'いいえ', lx:344, ly:316, d:'M340 248 C 362 248, 344 386, 366 386' },
+        { from:'q2', to:'l1', label:'はい',  lx:528, ly:84,  d:'M524 118 C 540 118, 536 65, 552 65' },
+        { from:'q2', to:'l2', label:'いいえ', lx:528, ly:140, d:'M524 118 C 540 118, 536 169, 552 169' },
+        { from:'q3', to:'l3', label:'はい',  lx:528, ly:354, d:'M524 386 C 540 386, 536 339, 552 339' },
+        { from:'q3', to:'l4', label:'いいえ', lx:528, ly:410, d:'M524 386 C 540 386, 536 443, 552 443' }
+      ]
+    };
+    this.DEC = { q1:{ yes:'q2', no:'q3' }, q2:{ yes:'l1', no:'l2' }, q3:{ yes:'l3', no:'l4' } };
+    this.SAMPLES = [
+      'パスワードを何度入れてもログインできません',
+      'ログイン画面が真っ白で進めません',
+      '社員全員が急にログインできなくなりました'
+    ];
+    this.ROUTES = [
+      { id:'r1', title:'2段階認証のコードが届かない', size:58, sample:'SMSの認証コードがいつまでも届きません',
+        recommended:'append',
+        append:{ target:'ログイン・認証', conf:92, reason:'既存の認証フローの分岐として「コード未着」リーフを追加できます（リーフ一致 87%）。' },
+        create:{ target:'2段階認証', conf:61, reason:'独立トピックとして新規作成。ただし既存マップとの重複が大きめです。' } },
+      { id:'r2', title:'請求書PDFがダウンロードできない', size:41, sample:'請求書のPDFを開こうとするとエラーになります',
+        recommended:'append',
+        append:{ target:'請求・課金', conf:88, reason:'既存「請求・課金」マップの出力系トラブルとして接続可能です。' },
+        create:{ target:'帳票・PDF', conf:55, reason:'帳票専用マップとして新規作成。' } },
+      { id:'r3', title:'Webhookが発火しない', size:36, sample:'イベントが起きてもWebhookが送信されません',
+        recommended:'create',
+        append:{ target:'データ同期', conf:48, reason:'同期マップに寄せられますが、文脈の一致は低めです。' },
+        create:{ target:'API・連携', conf:95, reason:'既存マップとの類似度が30%未満。新規「API・連携」マップを作成するのが適切です。' } },
+      { id:'r4', title:'管理者権限を別メンバーへ委譲したい', size:29, sample:'管理者を他の人に変更する方法を教えてください',
+        recommended:'append',
+        append:{ target:'権限・共有', conf:84, reason:'既存「権限・共有」マップにロール変更の分岐として追加できます。' },
+        create:{ target:'権限委譲', conf:50, reason:'委譲専用マップとして新規作成。' } },
+      { id:'r5', title:'アプリが起動直後に落ちる', size:24, sample:'モバイルアプリを開くとすぐ強制終了します',
+        recommended:'create',
+        append:{ target:'データ同期', conf:33, reason:'既存マップに該当する分岐がありません。' },
+        create:{ target:'モバイル不具合', conf:91, reason:'モバイル固有の事象で既存マップに当てはまりません。新規作成を推奨します。' } }
+    ];
+    this.state = {
+      view:'answer', messages:[], path:[], current:null, awaiting:false, finished:false, query:'',
+      importStep:0, processing:false,
+      routes: this.ROUTES.map((r) => ({ choice:r.recommended, status:'pending' }))
+    };
+  }
+
+  nodeById(id) { return this.TREE.nodes.find(n => n.id === id); }
+
+  go(view) { this.setState({ view }); }
+
+  ask(text) {
+    const t = (text || '').trim();
+    if (!t) return;
+    const q1 = this.nodeById('q1');
+    this.setState({
+      messages: [
+        { role:'user', text:t },
+        { role:'bot', kind:'match', text:'「ログイン・認証」マインドマップに一致しました（信頼度 96%）。順番に確認していきます。' },
+        { role:'bot', kind:'q', text:q1.title }
+      ],
+      path:['root','q1'], current:'q1', awaiting:true, finished:false, query:''
+    });
+  }
+
+  answer(ans) {
+    const cur = this.state.current;
+    const dec = this.DEC[cur];
+    if (!dec) return;
+    const nextId = dec[ans];
+    const next = this.nodeById(nextId);
+    const msgs = this.state.messages.concat([{ role:'user', text: ans === 'yes' ? 'はい' : 'いいえ' }]);
+    const path = this.state.path.concat([nextId]);
+    if (next.kind === '根本原因') {
+      msgs.push({ role:'bot', kind:'answer', cause:next.title, answer:next.answer });
+      this.setState({ messages:msgs, path, current:nextId, awaiting:false, finished:true });
+    } else {
+      msgs.push({ role:'bot', kind:'q', text:next.title });
+      this.setState({ messages:msgs, path, current:nextId, awaiting:true });
+    }
+  }
+
+  reset() { this.setState({ messages:[], path:[], current:null, awaiting:false, finished:false, query:'' }); }
+
+  pickFile() { this.setState({ importStep:1 }); }
+  gotoStep(n) { this.setState({ importStep:n }); }
+  startExtract() {
+    this.setState({ processing:true });
+    setTimeout(() => this.setState({ processing:false, importStep:3 }), 1600);
+  }
+  approveRoute(i) {
+    const routes = this.state.routes.map((r, idx) => idx === i ? { ...r, status:'approved' } : r);
+    this.setState({ routes });
+  }
+  toggleRoute(i) {
+    const routes = this.state.routes.map((r, idx) => idx === i ? { ...r, choice: r.choice === 'append' ? 'create' : 'append' } : r);
+    this.setState({ routes });
+  }
+  finishImport() { this.setState({ importStep:4 }); }
+  resetImport() {
+    this.setState({ importStep:0, processing:false, routes: this.ROUTES.map((r) => ({ choice:r.recommended, status:'pending' })) });
+  }
+
+  navStyle(v) {
+    const on = this.state.view === v;
+    return 'display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; cursor:pointer; font-size:13.5px;'
+      + 'font-weight:' + (on ? '600' : '500') + ';'
+      + 'color:' + (on ? '#4338CA' : '#52525B') + ';'
+      + 'background:' + (on ? '#EEF0FF' : 'transparent') + ';';
+  }
+
+  renderTree() {
+    const R = React.createElement;
+    const { path, current } = this.state;
+    const started = path.length > 0;
+    const inPath = (id) => path.includes(id);
+    const chip = (n) => {
+      let bg = '#F4F4F5', col = '#52525B';
+      if (n.kind === '症状') { bg = '#EEF0FF'; col = '#4338CA'; }
+      else if (n.kind === '根本原因') {
+        if (n.tone === 'amber') { bg = '#FAF1E1'; col = '#9A6212'; }
+        else if (n.tone === 'green') { bg = '#E7F4EE'; col = '#1C6B4F'; }
+        else if (n.tone === 'red') { bg = '#F7E9E8'; col = '#8E302D'; }
+      }
+      return R('span', { style:{ display:'inline-block', fontSize:'9px', fontWeight:600, letterSpacing:'.06em', padding:'2px 6px', borderRadius:'5px', fontFamily:"'IBM Plex Mono',monospace", background:bg, color:col } }, n.kind);
+    };
+    const toneBorder = (n) => n.tone === 'amber' ? '#C68A2E' : n.tone === 'green' ? '#2E8B6B' : n.tone === 'red' ? '#B0413E' : null;
+
+    const nodes = this.TREE.nodes.map((n) => {
+      const active = current === n.id;
+      const visited = inPath(n.id);
+      const dim = started && !visited;
+      const tb = toneBorder(n);
+      const style = {
+        position:'absolute', left:n.x+'px', top:n.y+'px', width:n.w+'px', boxSizing:'border-box',
+        background:'#fff', borderRadius:'12px', padding:'9px 11px',
+        border:'1px solid ' + (active ? '#4F46E5' : '#DDDEE3'),
+        borderLeft: tb ? '3px solid ' + tb : (active ? '1px solid #4F46E5' : '1px solid #DDDEE3'),
+        boxShadow: active ? '0 0 0 5px rgba(79,70,229,.14), 0 6px 18px -6px rgba(79,70,229,.45)' : '0 1px 3px rgba(24,24,27,.08)',
+        opacity: dim ? 0.38 : 1,
+        transition:'opacity .35s ease, box-shadow .35s ease, border-color .35s ease',
+        animation: active ? 'nodePulse 1.9s ease-in-out infinite' : 'none'
+      };
+      const children = [
+        R('div', { key:'c' }, chip(n)),
+        R('div', { key:'t', style:{ fontSize: n.kind === '根本原因' ? '12.5px' : '12.5px', fontWeight:600, color:'#18181B', lineHeight:1.32, marginTop:'6px' } }, n.title)
+      ];
+      if (n.sub) children.push(R('div', { key:'s', style:{ fontSize:'10.5px', color:'#52525B', marginTop:'4px', lineHeight:1.35 } }, n.sub));
+      return R('div', { key:n.id, style }, children);
+    });
+
+    const edges = this.TREE.edges.map((e) => {
+      const onPath = inPath(e.from) && inPath(e.to) && (path.indexOf(e.to) === path.indexOf(e.from) + 1);
+      const dimEdge = started && !onPath;
+      return R('path', { key:e.from+'-'+e.to, d:e.d, fill:'none',
+        stroke: onPath ? '#4F46E5' : '#A0A6B0', strokeWidth: onPath ? 2.4 : 1.5,
+        markerEnd: onPath ? 'url(#ap)' : 'url(#an)', opacity: dimEdge ? 0.3 : 1,
+        style:{ transition:'stroke .35s ease, opacity .35s ease' } });
+    });
+
+    const labels = this.TREE.edges.filter((e) => e.label).map((e) => {
+      const onPath = inPath(e.from) && inPath(e.to) && (path.indexOf(e.to) === path.indexOf(e.from) + 1);
+      const yes = e.label === 'はい';
+      const dimLbl = started && !onPath;
+      return R('div', { key:'lbl-'+e.from+'-'+e.to, style:{
+        position:'absolute', left:e.lx+'px', top:e.ly+'px', fontSize:'10px', fontWeight:600,
+        fontFamily:"'IBM Plex Mono',monospace", borderRadius:'6px', padding:'1px 6px',
+        color: yes ? '#1C6B4F' : '#71717A', background: yes ? '#E7F4EE' : '#F4F4F5',
+        border:'1px solid ' + (yes ? '#C7E6D7' : '#E4E4E7'), opacity: dimLbl ? 0.3 : 1,
+        transition:'opacity .35s ease' } }, e.label);
+    });
+
+    const svg = R('svg', { viewBox:'0 0 720 500', style:{ position:'absolute', inset:0, width:'100%', height:'100%', overflow:'visible' } },
+      R('defs', null,
+        R('marker', { id:'an', markerWidth:9, markerHeight:9, refX:6.5, refY:3, orient:'auto' }, R('path', { d:'M0 0 L6.5 3 L0 6 z', fill:'#A0A6B0' })),
+        R('marker', { id:'ap', markerWidth:9, markerHeight:9, refX:6.5, refY:3, orient:'auto' }, R('path', { d:'M0 0 L6.5 3 L0 6 z', fill:'#4F46E5' }))
+      ),
+      edges
+    );
+
+    const hint = !started ? R('div', { key:'hint', style:{ position:'absolute', left:'50%', top:'14px', transform:'translateX(-50%)', fontSize:'11px', color:'#A1A1AA', background:'rgba(255,255,255,.8)', border:'1px solid #E6E6E9', borderRadius:'8px', padding:'5px 11px', whiteSpace:'nowrap' } }, '質問を入力すると、ここを辿って回答します') : null;
+
+    return R('div', { style:{ position:'relative', width:'720px', height:'500px', background:'#FAFAFA', backgroundImage:'radial-gradient(#D7D7DC 1px, transparent 1px)', backgroundSize:'18px 18px', borderRadius:'14px', border:'1px solid #E6E6E9', fontFamily:"'IBM Plex Sans JP',system-ui,sans-serif" } },
+      [svg].concat(labels).concat(nodes).concat(hint ? [hint] : []));
+  }
+
+  componentDidMount() {
+    const fit = () => {
+      document.querySelectorAll('[data-frame]').forEach((f) => {
+        f.style.transform = 'none';
+        const natW = f.offsetWidth, natH = f.offsetHeight;
+        let avail = natW;
+        if (f.parentElement) {
+          const pcs = getComputedStyle(f.parentElement);
+          const pad = parseFloat(pcs.paddingLeft || 0) + parseFloat(pcs.paddingRight || 0);
+          avail = f.parentElement.clientWidth - pad - 4;
+        }
+        const s = Math.min(1, avail / natW);
+        f.style.transformOrigin = 'top center';
+        f.style.transform = 'scale(' + s + ')';
+        f.style.marginBottom = (-(natH * (1 - s))) + 'px';
+      });
+    };
+    this._fit = fit;
+    fit();
+    window.addEventListener('resize', fit);
+    [120, 400, 900].forEach((t) => setTimeout(fit, t));
+  }
+
+  componentDidUpdate() {
+    const el = document.getElementById('chatScroll');
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  componentWillUnmount() { if (this._fit) window.removeEventListener('resize', this._fit); }
+
+  renderVals() {
+    const s = this.state;
+    const messages = s.messages.map((m) => ({
+      text: m.text, cause: m.cause, answer: m.answer,
+      isUser: m.role === 'user',
+      isBotText: m.role === 'bot' && (m.kind === 'match' || m.kind === 'q'),
+      isAnswer: m.kind === 'answer'
+    }));
+    const samples = this.SAMPLES.map((t) => ({ text:t, onClick: () => this.ask(t) }));
+    let treeStatus = '待機中';
+    if (s.finished) treeStatus = '根本原因に到達';
+    else if (s.awaiting) treeStatus = '確認 ' + (s.path.length - 1) + ' 件目';
+
+    const routes = s.routes;
+    const routesView = this.ROUTES.map((r, i) => {
+      const st = routes[i];
+      const opt = st.choice === 'append' ? r.append : r.create;
+      return {
+        title:r.title, size:r.size, sample:r.sample,
+        isAppend: st.choice === 'append', isNew: st.choice === 'create',
+        target:opt.target, conf:opt.conf, reason:opt.reason,
+        isPending: st.status === 'pending', isApproved: st.status === 'approved',
+        isRecommended: st.choice === r.recommended,
+        onApprove: () => this.approveRoute(i),
+        onToggle: () => this.toggleRoute(i)
+      };
+    });
+    const approvedCount = routes.filter((r) => r.status === 'approved').length;
+    const appendCount = routes.filter((r) => r.choice === 'append' && r.status === 'approved').length;
+    const newCount = routes.filter((r) => r.choice === 'create' && r.status === 'approved').length;
+    const totalQ = this.ROUTES.reduce((a, r) => a + r.size, 0);
+    const stepLabels = ['アップロード', '列マッピング', 'プレビュー', '振り分け'];
+    const stepsView = stepLabels.map((label, idx) => ({
+      label, num: idx + 1, notLast: idx !== 3,
+      done: s.importStep > idx, now: s.importStep === idx, todo: s.importStep < idx
+    }));
+
+    return {
+      stepsView,
+      isAnswer: s.view === 'answer', isImport: s.view === 'import', isMaps: s.view === 'maps',
+      importStep: s.importStep, processing: s.processing,
+      isStep0: s.view === 'import' && s.importStep === 0 && !s.processing,
+      isStep1: s.view === 'import' && s.importStep === 1,
+      isStep2: s.view === 'import' && s.importStep === 2 && !s.processing,
+      isProcessing: s.processing,
+      isStep3: s.view === 'import' && s.importStep === 3,
+      isStep4: s.view === 'import' && s.importStep === 4,
+      step1done: s.importStep > 1, step2done: s.importStep > 2, step3done: s.importStep > 3,
+      step1now: s.importStep === 1, step2now: s.importStep === 2, step3now: s.importStep === 3,
+      step4now: s.importStep >= 4,
+      routesView, approvedCount, appendCount, newCount, totalQ,
+      routeProgress: approvedCount + ' / ' + routes.length + ' 件 確認済み',
+      allApproved: approvedCount === routes.length,
+      notAllApproved: approvedCount !== routes.length,
+      pickFile: () => this.pickFile(),
+      toMapping: () => this.gotoStep(1), toPreview: () => this.gotoStep(2),
+      backTo0: () => this.gotoStep(0), backTo1: () => this.gotoStep(1),
+      startExtract: () => this.startExtract(),
+      finishImport: () => this.finishImport(),
+      resetImport: () => this.resetImport(),
+      navAnswer: this.navStyle('answer'), navImport: this.navStyle('import'), navMaps: this.navStyle('maps'),
+      goAnswer: () => this.go('answer'), goImport: () => this.go('import'), goMaps: () => this.go('maps'),
+      messages, samples,
+      matched: s.messages.length > 0,
+      showStart: s.messages.length === 0,
+      awaiting: s.awaiting,
+      notAwaiting: !s.awaiting,
+      finished: s.finished,
+      query: s.query,
+      onYes: () => this.answer('yes'),
+      onNo: () => this.answer('no'),
+      onSend: () => this.ask(s.query),
+      onQueryInput: (e) => this.setState({ query: e.target.value }),
+      onQueryKey: (e) => { if (e.key === 'Enter') this.ask(this.state.query); },
+      reset: () => this.reset(),
+      treeEl: this.renderTree(),
+      treeStatus
+    };
+  }
+}
+</script>
+</body>
+</html>

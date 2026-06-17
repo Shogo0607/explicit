@@ -25,9 +25,12 @@ try {
   assert.equal(initialSettings.provider, "openai");
   assert.equal(initialSettings.hasOpenAIKey, false);
   assert.equal(initialSettings.openaiBaseUrl, "https://api.openai.com/v1");
+  assert.equal(initialSettings.model, "gpt-4o-mini");
+  assert.ok(initialSettings.modelOptions.includes("gpt-4o-mini"));
 
   const updatedSettings = await putJson(`http://localhost:${port}/api/settings`, {
     provider: "azure",
+    model: "custom-support-model",
     openaiBaseUrl: "https://proxy.example/v1/",
     azureBaseUrl: "https://example-resource.openai.azure.com/openai/v1/",
     azureApiVersion: "preview",
@@ -37,10 +40,12 @@ try {
   assert.equal(updatedSettings.hasAzureKey, true);
   assert.equal(updatedSettings.azureBaseUrl, "https://example-resource.openai.azure.com/openai/v1");
   assert.equal(updatedSettings.openaiBaseUrl, "https://proxy.example/v1");
+  assert.equal(updatedSettings.model, "custom-support-model");
 
   const azureHealth = await fetchJson(`http://localhost:${port}/api/health`);
   assert.equal(azureHealth.provider, "azure");
   assert.equal(azureHealth.hasKey, false);
+  assert.equal(azureHealth.model, "custom-support-model");
 
   const workspaces = await fetchJson(`http://localhost:${port}/api/workspaces`);
   assert.ok(workspaces.workspaces.some((workspace) => workspace.id === "support"));

@@ -530,11 +530,11 @@
                     </div>
                   </div>
 
-                  <div class="provider-fields" data-provider-fields="azure">
-                    <div class="field">
-                      <label for="azureApiKey">Azure OpenAI API key</label>
-                      <input id="azureApiKey" name="azureApiKey" type="password" autocomplete="off" placeholder="Azure resource key">
-                      <small id="azureKeyHint">保存済みキーはありません</small>
+	                  <div class="provider-fields" data-provider-fields="azure">
+	                    <div class="field">
+	                      <label for="azureApiKey">Azure OpenAI API key</label>
+	                      <input id="azureApiKey" name="azureApiKey" type="password" autocomplete="off" placeholder="Azure resource key">
+	                      <small id="azureKeyHint">保存済みキーはありません</small>
                     </div>
                     <div class="field">
                       <label for="azureBaseUrl">Base URL</label>
@@ -542,10 +542,19 @@
                     </div>
                     <div class="field">
                       <label for="azureApiVersion">API version</label>
-                      <input id="azureApiVersion" name="azureApiVersion" placeholder="preview">
-                    </div>
-                  </div>
-                </div>
+	                      <input id="azureApiVersion" name="azureApiVersion" placeholder="preview">
+	                    </div>
+	                  </div>
+	                  <div class="field">
+	                    <label for="modelSelect">Model</label>
+	                    <select id="modelSelect" name="modelSelect"></select>
+	                    <small>プリセットにないモデルやAzureデプロイ名は下の入力欄で指定できます</small>
+	                  </div>
+	                  <div class="field">
+	                    <label for="modelCustom">Custom model</label>
+	                    <input id="modelCustom" name="model" autocomplete="off" placeholder="gpt-4o-mini">
+	                  </div>
+	                </div>
                 <div class="settings-actions">
                   <button class="primary" type="submit">保存</button>
                   <button class="ghost" type="button" id="reloadSettings">再読み込み</button>

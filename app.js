@@ -71,7 +71,8 @@ const state = {
     openaiBaseUrl: "https://api.openai.com/v1",
     azureBaseUrl: "",
     azureApiVersion: "preview",
-    model: "-"
+    model: "-",
+    modelOptions: []
   }
 };
 
@@ -1479,6 +1480,17 @@ function populateSettingsForm() {
   $("#openaiBaseUrl").value = state.settings.openaiBaseUrl || "https://api.openai.com/v1";
   $("#azureBaseUrl").value = state.settings.azureBaseUrl || "";
   $("#azureApiVersion").value = state.settings.azureApiVersion || "preview";
+  populateModelFields();
+}
+
+function populateModelFields() {
+  const select = $("#modelSelect");
+  const input = $("#modelCustom");
+  if (!select || !input) return;
+  const current = state.settings.model || "gpt-4o-mini";
+  const options = [...new Set([current, ...(state.settings.modelOptions || [])])].filter(Boolean);
+  select.innerHTML = options.map((model) => `<option value="${escapeHtml(model)}" ${model === current ? "selected" : ""}>${escapeHtml(model)}</option>`).join("");
+  input.value = current;
 }
 
 function applyProviderVisibility(provider) {
@@ -1519,6 +1531,7 @@ async function saveSettings(event) {
   try {
     const result = await putJson("/api/settings", {
       provider: state.settings.provider,
+      model: (form.get("model") || form.get("modelSelect") || "").toString().trim(),
       openaiApiKey: form.get("openaiApiKey"),
       openaiBaseUrl: form.get("openaiBaseUrl"),
       azureApiKey: form.get("azureApiKey"),
@@ -1715,6 +1728,10 @@ $("#flowModal")?.addEventListener("click", (event) => {
 });
 $("#settingsForm").addEventListener("submit", saveSettings);
 $("#reloadSettings").addEventListener("click", () => loadSettings(true));
+$("#modelSelect")?.addEventListener("change", (event) => {
+  const input = $("#modelCustom");
+  if (input) input.value = event.target.value;
+});
 $("#resetAnswer").addEventListener("click", resetAnswer);
 $("#backToAnswer")?.addEventListener("click", () => setView("answer"));
 $("#fileInput").addEventListener("change", (event) => {

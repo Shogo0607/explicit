@@ -14,7 +14,7 @@ const OKF_DIR = process.env.OKF_DIR || path.join(DATA_DIR, "okf");
 loadEnvFile(ENV_FILE);
 
 const PORT = Number(process.env.PORT || 4173);
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+const DEFAULT_MODEL = "gpt-4o-mini";
 const OPENAI_DISABLED = /^(1|true|yes)$/i.test(process.env.OPENAI_DISABLED || "");
 const DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_AZURE_API_VERSION = "preview";
@@ -83,7 +83,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && url.pathname === "/") return redirect(res, "/assistant.html");
     if (req.method === "GET" && url.pathname === "/api/health") {
       const config = getAiConfig();
-      return json(res, 200, { ok: true, hasKey: Boolean(config.key) && !OPENAI_DISABLED, provider: config.provider, model: MODEL });
+      return json(res, 200, { ok: true, hasKey: Boolean(config.key) && !OPENAI_DISABLED, provider: config.provider, model: getModel() });
     }
     if (req.method === "GET" && url.pathname === "/api/settings") return handleGetSettings(res);
     if (req.method === "PUT" && url.pathname === "/api/settings") return await handleUpdateSettings(req, res);
@@ -528,8 +528,10 @@ async function handleUpdateSettings(req, res) {
   const openaiBaseUrl = cleanUrl(body.openaiBaseUrl) || DEFAULT_OPENAI_BASE_URL;
   const azureBaseUrl = cleanUrl(body.azureBaseUrl);
   const azureApiVersion = String(body.azureApiVersion || DEFAULT_AZURE_API_VERSION).trim() || DEFAULT_AZURE_API_VERSION;
+  const model = normalizeModel(body.model);
   const updates = {
     AI_PROVIDER: provider,
+    OPENAI_MODEL: model,
     OPENAI_BASE_URL: openaiBaseUrl,
     AZURE_OPENAI_BASE_URL: azureBaseUrl,
     AZURE_OPENAI_API_VERSION: azureApiVersion
@@ -554,9 +556,26 @@ function publicSettings() {
     openaiBaseUrl: process.env.OPENAI_BASE_URL || DEFAULT_OPENAI_BASE_URL,
     azureBaseUrl: process.env.AZURE_OPENAI_BASE_URL || "",
     azureApiVersion: process.env.AZURE_OPENAI_API_VERSION || DEFAULT_AZURE_API_VERSION,
-    model: MODEL,
+    model: getModel(),
+    modelOptions: modelOptions(),
     disabled: OPENAI_DISABLED
   };
+}
+
+function getModel() {
+  return normalizeModel(process.env.OPENAI_MODEL);
+}
+
+function normalizeModel(value) {
+  const model = String(value || "").trim();
+  if (!model) return DEFAULT_MODEL;
+  return model.replace(/[\r\n\t"'`]/g, "").slice(0, 100) || DEFAULT_MODEL;
+}
+
+function modelOptions() {
+  const current = getModel();
+  const options = [DEFAULT_MODEL, "gpt-4o", "gpt-4.1-mini", "gpt-4.1", "o4-mini"];
+  return [...new Set([current, ...options])];
 }
 
 async function updateEnvFile(filePath, updates) {
@@ -855,7 +874,7 @@ async function callOpenAI(input, fallback) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: MODEL,
+        model: getModel(),
         input,
         temperature: 0.2,
         text: { format: { type: "json_object" } }

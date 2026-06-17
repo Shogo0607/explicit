@@ -1,14 +1,16 @@
 import http from "node:http";
-import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import YAML from "yaml";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ENV_FILE = process.env.SETTINGS_ENV_FILE || path.join(__dirname, ".env.local");
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, ".data");
 const MAPS_FILE = process.env.MAPS_FILE || path.join(DATA_DIR, "maps.json");
 const FEEDBACK_FILE = process.env.FEEDBACK_FILE || path.join(DATA_DIR, "feedback.jsonl");
+const OKF_DIR = process.env.OKF_DIR || path.join(DATA_DIR, "okf");
 loadEnvFile(ENV_FILE);
 
 const PORT = Number(process.env.PORT || 4173);
@@ -64,7 +66,7 @@ workspacesStore.set(DEFAULT_WORKSPACE_ID, {
   updatedAt: new Date().toISOString()
 });
 mapsStore.set(mindMap.id, { ...mindMap, source: "builtin", workspaceId: DEFAULT_WORKSPACE_ID });
-await loadPersistedMaps();
+if (!(await loadOkfBundle())) await loadPersistedMaps();
 normalizeStoredMaps();
 
 const routesSeed = [
@@ -609,6 +611,7 @@ function handleExportMap(url, res) {
   const format = String(url.searchParams.get("format") || "json").toLowerCase();
   if (format === "csv") return text(res, 200, mapToCsv(map), "text/csv; charset=utf-8", `${map.id}.csv`);
   if (format === "skill" || format === "md" || format === "skill.md") return text(res, 200, mapToSkillMd(map), "text/markdown; charset=utf-8", "SKILL.md");
+  if (format === "okf") return text(res, 200, JSON.stringify(mapToOkfBundle(map), null, 2), "application/json; charset=utf-8", `${map.id}.okf.json`);
   return text(res, 200, JSON.stringify(map, null, 2), "application/json; charset=utf-8", `${map.id}.json`);
 }
 
@@ -1216,6 +1219,433 @@ function uniqueWorkspaceId(label) {
   return id;
 }
 
+function okfConcept(frontmatter, body = "") {
+  return `---\n${YAML.stringify(frontmatter).trimEnd()}\n---\n\n${body.trimEnd()}\n`;
+}
+
+function parseOkfConcept(text) {
+  const match = String(text || "").match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if (!match) return { frontmatter: {}, body: String(text || "") };
+  return {
+    frontmatter: YAML.parse(match[1]) || {},
+    body: match[2] || ""
+  };
+}
+
+function okfTypeForNode(node) {
+  if (node.type === "symptom") return "Support Symptom";
+  if (node.type === "leaf") return "Root Cause";
+  return "Decision Question";
+}
+
+function okfNodePath(mapId, nodeId) {
+  return `/nodes/${slugify(mapId)}/${slugify(nodeId)}.md`;
+}
+
+function okfQaPath(mapId, nodeId, idx) {
+  return `/references/qa/${slugify(mapId)}/${slugify(nodeId)}-${idx + 1}.md`;
+}
+
+function okfLinkTitle(value) {
+  return String(value || "").replace(/[[\]\n\r]/g, " ").trim() || "Untitled";
+}
+
+function mapToOkfBundle(map) {
+  const workspace = workspacesStore.get(map.workspaceId || DEFAULT_WORKSPACE_ID) || workspacesStore.get(DEFAULT_WORKSPACE_ID);
+  const files = {};
+  const add = (filePath, content) => { files[filePath.replace(/^\/+/, "")] = content; };
+  add("index.md", okfRootIndex([...workspacesStore.values()], [map]));
+  add("workspaces/index.md", okfDirectoryIndex("Workspaces", [{ title: workspace.label, href: `${slugify(workspace.id)}.md`, description: workspace.description || "" }]));
+  add(`workspaces/${slugify(workspace.id)}.md`, okfWorkspaceConcept(workspace, [map]));
+  add("maps/index.md", okfDirectoryIndex("Maps", [{ title: map.label, href: `${slugify(map.id)}.md`, description: `${map.nodes.length} nodes / ${map.edges.length} branches` }]));
+  add(`maps/${slugify(map.id)}.md`, okfMapConcept(map));
+  add(`nodes/${slugify(map.id)}/index.md`, okfDirectoryIndex(`${map.label} Nodes`, map.nodes.map((node) => ({
+    title: node.title,
+    href: `${slugify(node.id)}.md`,
+    description: `${okfTypeForNode(node)} / ${node.status || REVIEW_NODE_STATUS}`
+  }))));
+  for (const node of map.nodes) {
+    add(`nodes/${slugify(map.id)}/${slugify(node.id)}.md`, okfNodeConcept(map, node));
+    for (const [idx, qa] of (node.sourceQa || []).entries()) {
+      add(`references/qa/${slugify(map.id)}/${slugify(node.id)}-${idx + 1}.md`, okfQaConcept(map, node, qa, idx));
+    }
+  }
+  return {
+    okf_version: "0.1",
+    app_schema: "distill-support-map/v1",
+    bundle_root: ".",
+    files
+  };
+}
+
+function okfRootIndex(workspaces, maps) {
+  const body = [
+    "# Distill Support Knowledge Bundle",
+    "",
+    "This bundle is the canonical internal knowledge store for the support answer assistant.",
+    "",
+    "# Workspaces",
+    "",
+    ...workspaces.map((workspace) => `* [${okfLinkTitle(workspace.label)}](/workspaces/${slugify(workspace.id)}.md) - ${workspace.description || "Support workspace"}`),
+    "",
+    "# Maps",
+    "",
+    ...maps.map((map) => `* [${okfLinkTitle(map.label)}](/maps/${slugify(map.id)}.md) - ${map.nodes.length} nodes / ${map.edges.length} branches`)
+  ].join("\n");
+  return okfConcept({ okf_version: "0.1", app_schema: "distill-support-map/v1" }, body);
+}
+
+function okfDirectoryIndex(title, entries) {
+  return [`# ${title}`, "", ...entries.map((entry) => `* [${okfLinkTitle(entry.title)}](${entry.href}) - ${entry.description || ""}`)].join("\n") + "\n";
+}
+
+function okfWorkspaceConcept(workspace, maps) {
+  const frontmatter = {
+    type: "Support Workspace",
+    title: workspace.label,
+    description: workspace.description || "",
+    resource: `app://workspaces/${workspace.id}`,
+    tags: ["support", "workspace"],
+    timestamp: workspace.updatedAt || workspace.createdAt || new Date().toISOString(),
+    okf_version: "0.1",
+    app_schema: "distill-support-map/v1",
+    workspace_id: workspace.id,
+    created_at: workspace.createdAt || ""
+  };
+  const body = [
+    "# Purpose",
+    "",
+    workspace.description || "Support knowledge workspace.",
+    "",
+    "# Maps",
+    "",
+    ...maps.map((map) => `* [${okfLinkTitle(map.label)}](/maps/${slugify(map.id)}.md)`)
+  ].join("\n");
+  return okfConcept(frontmatter, body);
+}
+
+function okfMapConcept(map) {
+  const rootId = map.nodes.some((node) => node.id === "root") ? "root" : map.nodes[0]?.id || "";
+  const frontmatter = {
+    type: "Support Decision Map",
+    title: map.label,
+    description: `Decision map for ${map.label}.`,
+    resource: `app://maps/${map.id}`,
+    tags: ["support", "decision-map", map.workspaceId || DEFAULT_WORKSPACE_ID],
+    timestamp: map.updatedAt || map.createdAt || new Date().toISOString(),
+    okf_version: "0.1",
+    app_schema: "distill-support-map/v1",
+    map_id: map.id,
+    workspace_id: map.workspaceId || DEFAULT_WORKSPACE_ID,
+    map_status: map.status || REVIEW_NODE_STATUS,
+    source: map.source || "okf",
+    root_node_id: rootId,
+    settings: map.settings || {},
+    mapping: map.mapping || {},
+    created_at: map.createdAt || ""
+  };
+  const body = [
+    "# Traversal Contract",
+    "",
+    "Agents should start at the root node, inspect the node body and `outcomes` frontmatter, then select one outgoing branch or ask the node's follow-up question when confidence is low.",
+    "",
+    "# Nodes",
+    "",
+    ...map.nodes.map((node) => `* [${okfLinkTitle(node.title)}](${okfNodePath(map.id, node.id)}) - ${okfTypeForNode(node)} / ${node.status || REVIEW_NODE_STATUS}`),
+    "",
+    "# Branches",
+    "",
+    ...map.edges.map((edge) => {
+      const from = map.nodes.find((node) => node.id === edge.from);
+      const to = map.nodes.find((node) => node.id === edge.to);
+      return `* [${okfLinkTitle(from?.title || edge.from)}](${okfNodePath(map.id, edge.from)}) -> [${okfLinkTitle(to?.title || edge.to)}](${okfNodePath(map.id, edge.to)}) - ${edge.label || "next"}${edge.condition ? `; condition: ${edge.condition}` : ""}`;
+    })
+  ].join("\n");
+  return okfConcept(frontmatter, body);
+}
+
+function okfNodeConcept(map, node) {
+  const outgoing = (map.edges || []).filter((edge) => edge.from === node.id);
+  const incoming = (map.edges || []).filter((edge) => edge.to === node.id);
+  const frontmatter = {
+    type: okfTypeForNode(node),
+    title: node.title,
+    description: nodeDescription(node),
+    resource: `app://maps/${map.id}/nodes/${node.id}`,
+    tags: ["support", map.workspaceId || DEFAULT_WORKSPACE_ID, map.id, node.type || "question"],
+    timestamp: node.updatedAt || map.updatedAt || map.createdAt || new Date().toISOString(),
+    okf_version: "0.1",
+    app_schema: "distill-support-map/v1",
+    map_id: map.id,
+    node_id: node.id,
+    node_kind: node.type,
+    status: node.status || REVIEW_NODE_STATUS,
+    position: node.position || null,
+    metrics: node.metrics || { resolved: 0, unresolved: 0 },
+    keywords: node.keywords || [],
+    root_cause: node.rootCause || "",
+    answer: node.answer || "",
+    next_question: node.nextQuestion || "",
+    escalation: node.escalation || "",
+    reason: node.reason || "",
+    target: node.target || "",
+    action: node.action || "",
+    parent_id: node.parentId || incoming[0]?.from || "",
+    confidence: node.confidence || null,
+    sample: node.sample || "",
+    source_qa: node.sourceQa || [],
+    outcomes: outgoing.map((edge) => ({
+      edge_id: edge.id,
+      label: edge.label || "next",
+      condition: edge.condition || "",
+      to: okfNodePath(map.id, edge.to),
+      to_node_id: edge.to
+    })),
+    incoming: incoming.map((edge) => ({
+      edge_id: edge.id,
+      label: edge.label || "next",
+      from: okfNodePath(map.id, edge.from),
+      from_node_id: edge.from
+    })),
+    created_at: node.createdAt || ""
+  };
+  const body = [
+    "# Agent Instructions",
+    "",
+    agentInstructionForNode(node),
+    "",
+    node.type === "question" ? "# Decision Criteria" : node.type === "leaf" ? "# Root Cause" : "# Entry Context",
+    "",
+    node.reason || node.rootCause || node.title,
+    "",
+    ...(node.nextQuestion ? ["# Follow-up Question", "", node.nextQuestion, ""] : []),
+    ...(node.answer ? ["# Answer", "", node.answer, ""] : []),
+    ...(node.escalation ? ["# Escalation", "", node.escalation, ""] : []),
+    "# Decision Outcomes",
+    "",
+    ...(outgoing.length ? outgoing.map((edge) => {
+      const to = map.nodes.find((item) => item.id === edge.to);
+      return `* [${edge.label || "next"}](${okfNodePath(map.id, edge.to)}) - ${edge.condition || to?.title || ""}`;
+    }) : ["No outgoing outcomes. This is a terminal concept."]),
+    "",
+    "# Evidence",
+    "",
+    ...((node.sourceQa || []).length ? node.sourceQa.map((item) => `* Q: ${item.question || ""}\n  A: ${item.answer || ""}${item.category ? `\n  Category: ${item.category}` : ""}`) : ["No source Q&A has been attached."]),
+    "",
+    "# Citations",
+    "",
+    ...((node.sourceQa || []).length ? node.sourceQa.map((item, idx) => `[${idx + 1}] [Source Q&A ${idx + 1}](${okfQaPath(map.id, node.id, idx)})`) : ["No citations."])
+  ].join("\n");
+  return okfConcept(frontmatter, body);
+}
+
+function okfQaConcept(map, node, qa, idx) {
+  const title = `${node.title} source Q&A ${idx + 1}`;
+  const frontmatter = {
+    type: "Reference",
+    title,
+    description: qa.question || qa.answer || "Source Q&A used as support evidence.",
+    resource: `app://maps/${map.id}/nodes/${node.id}/source-qa/${idx + 1}`,
+    tags: ["support", "source-qa", map.id, node.id],
+    timestamp: node.updatedAt || map.updatedAt || new Date().toISOString(),
+    okf_version: "0.1",
+    app_schema: "distill-support-map/v1",
+    map_id: map.id,
+    node_id: node.id,
+    source_qa_index: idx + 1,
+    category: qa.category || ""
+  };
+  const body = [
+    "# Question",
+    "",
+    qa.question || "",
+    "",
+    "# Answer",
+    "",
+    qa.answer || "",
+    "",
+    "# Related Concept",
+    "",
+    `[${okfLinkTitle(node.title)}](${okfNodePath(map.id, node.id)})`
+  ].join("\n");
+  return okfConcept(frontmatter, body);
+}
+
+function nodeDescription(node) {
+  if (node.type === "leaf") return node.rootCause || node.answer || node.title;
+  if (node.type === "question") return node.nextQuestion || node.reason || node.title;
+  return node.reason || node.title;
+}
+
+function agentInstructionForNode(node) {
+  if (node.type === "leaf") return "This terminal node provides the root cause and answer. Use the answer text, cite attached evidence, and apply escalation guidance when conditions match.";
+  if (node.type === "symptom") return "This entry node frames the initial user symptom. Compare the user request with outgoing outcomes and continue to the most relevant decision node.";
+  return "This decision node is suitable for a subagent. Evaluate the user's message and available evidence against each outcome condition, return the selected branch label and confidence, or ask the follow-up question when the branch is ambiguous.";
+}
+
+async function loadOkfBundle() {
+  if (!existsSync(OKF_DIR)) return false;
+  try {
+    const mapsDir = path.join(OKF_DIR, "maps");
+    const nodesDir = path.join(OKF_DIR, "nodes");
+    if (!existsSync(mapsDir) || !existsSync(nodesDir)) return false;
+
+    const loadedWorkspaces = new Map();
+    const workspacesDir = path.join(OKF_DIR, "workspaces");
+    if (existsSync(workspacesDir)) {
+      for (const entry of await readdir(workspacesDir, { withFileTypes: true })) {
+        if (!entry.isFile() || !entry.name.endsWith(".md") || entry.name === "index.md") continue;
+        const { frontmatter } = parseOkfConcept(await readFile(path.join(workspacesDir, entry.name), "utf8"));
+        const id = String(frontmatter.workspace_id || path.basename(entry.name, ".md"));
+        loadedWorkspaces.set(id, {
+          id,
+          label: String(frontmatter.title || id),
+          description: String(frontmatter.description || ""),
+          createdAt: String(frontmatter.created_at || frontmatter.timestamp || new Date().toISOString()),
+          updatedAt: String(frontmatter.timestamp || "")
+        });
+      }
+    }
+
+    const loadedMaps = new Map();
+    for (const entry of await readdir(mapsDir, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.endsWith(".md") || entry.name === "index.md") continue;
+      const { frontmatter } = parseOkfConcept(await readFile(path.join(mapsDir, entry.name), "utf8"));
+      const id = String(frontmatter.map_id || path.basename(entry.name, ".md"));
+      loadedMaps.set(id, {
+        id,
+        label: String(frontmatter.title || id),
+        workspaceId: String(frontmatter.workspace_id || DEFAULT_WORKSPACE_ID),
+        source: String(frontmatter.source || "okf"),
+        status: String(frontmatter.map_status || REVIEW_NODE_STATUS),
+        createdAt: String(frontmatter.created_at || frontmatter.timestamp || new Date().toISOString()),
+        updatedAt: String(frontmatter.timestamp || ""),
+        settings: frontmatter.settings && typeof frontmatter.settings === "object" ? frontmatter.settings : {},
+        mapping: frontmatter.mapping && typeof frontmatter.mapping === "object" ? frontmatter.mapping : {},
+        nodes: [],
+        edges: []
+      });
+    }
+
+    for (const mapEntry of await readdir(nodesDir, { withFileTypes: true })) {
+      if (!mapEntry.isDirectory()) continue;
+      const map = [...loadedMaps.values()].find((item) => item.id === mapEntry.name || slugify(item.id) === mapEntry.name);
+      if (!map) continue;
+      const mapNodesDir = path.join(nodesDir, mapEntry.name);
+      const edges = [];
+      for (const entry of await readdir(mapNodesDir, { withFileTypes: true })) {
+        if (!entry.isFile() || !entry.name.endsWith(".md") || entry.name === "index.md") continue;
+        const { frontmatter } = parseOkfConcept(await readFile(path.join(mapNodesDir, entry.name), "utf8"));
+        const node = okfFrontmatterToNode(frontmatter, entry.name);
+        map.nodes.push(node);
+        for (const outcome of Array.isArray(frontmatter.outcomes) ? frontmatter.outcomes : []) {
+          const to = String(outcome.to_node_id || path.basename(String(outcome.to || ""), ".md"));
+          if (!to) continue;
+          edges.push({
+            id: String(outcome.edge_id || uniqueEdgeId({ edges }, node.id, to, outcome.label || "next")),
+            from: node.id,
+            to,
+            label: String(outcome.label || ""),
+            condition: String(outcome.condition || "")
+          });
+        }
+      }
+      map.edges = edges;
+    }
+
+    if (!loadedMaps.size) return false;
+    for (const [id, workspace] of loadedWorkspaces) workspacesStore.set(id, workspace);
+    for (const [id, map] of loadedMaps) mapsStore.set(id, map);
+    return true;
+  } catch (error) {
+    console.warn(`OKF bundle load failed: ${error.message}`);
+    return false;
+  }
+}
+
+function okfFrontmatterToNode(frontmatter, fileName) {
+  const typeByOkf = {
+    "Support Symptom": "symptom",
+    "Decision Question": "question",
+    "Root Cause": "leaf"
+  };
+  const node = {
+    id: String(frontmatter.node_id || path.basename(fileName, ".md")),
+    type: normalizeNodeType(frontmatter.node_kind || typeByOkf[frontmatter.type] || "question"),
+    title: String(frontmatter.title || path.basename(fileName, ".md")),
+    status: normalizeNodeStatus(frontmatter.status || REVIEW_NODE_STATUS),
+    metrics: frontmatter.metrics && typeof frontmatter.metrics === "object" ? frontmatter.metrics : { resolved: 0, unresolved: 0 },
+    sourceQa: normalizeSourceQa(frontmatter.source_qa || []),
+    keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords.map(String).slice(0, 12) : [],
+    rootCause: String(frontmatter.root_cause || ""),
+    answer: String(frontmatter.answer || ""),
+    nextQuestion: String(frontmatter.next_question || ""),
+    escalation: String(frontmatter.escalation || ""),
+    reason: String(frontmatter.reason || ""),
+    target: String(frontmatter.target || ""),
+    action: String(frontmatter.action || ""),
+    parentId: String(frontmatter.parent_id || ""),
+    confidence: frontmatter.confidence == null ? undefined : normalizeConfidence(frontmatter.confidence),
+    sample: String(frontmatter.sample || ""),
+    createdAt: String(frontmatter.created_at || ""),
+    updatedAt: String(frontmatter.timestamp || "")
+  };
+  if (frontmatter.position && typeof frontmatter.position === "object") node.position = normalizePosition(frontmatter.position);
+  return node;
+}
+
+async function writeOkfBundle(workspaces, maps) {
+  await ensureDataDir();
+  await rm(OKF_DIR, { recursive: true, force: true });
+  await mkdir(OKF_DIR, { recursive: true, mode: 0o700 });
+  const allMaps = maps.filter((map) => map?.id && Array.isArray(map.nodes) && Array.isArray(map.edges));
+  const addFile = async (relativePath, content) => {
+    const filePath = path.join(OKF_DIR, relativePath);
+    await mkdir(path.dirname(filePath), { recursive: true, mode: 0o700 });
+    await writeFile(filePath, content, { mode: 0o600 });
+  };
+
+  await addFile("index.md", okfRootIndex(workspaces, allMaps));
+  await addFile("workspaces/index.md", okfDirectoryIndex("Workspaces", workspaces.map((workspace) => ({
+    title: workspace.label,
+    href: `${slugify(workspace.id)}.md`,
+    description: workspace.description || ""
+  }))));
+  for (const workspace of workspaces) {
+    await addFile(`workspaces/${slugify(workspace.id)}.md`, okfWorkspaceConcept(workspace, allMaps.filter((map) => (map.workspaceId || DEFAULT_WORKSPACE_ID) === workspace.id)));
+  }
+  await addFile("maps/index.md", okfDirectoryIndex("Maps", allMaps.map((map) => ({
+    title: map.label,
+    href: `${slugify(map.id)}.md`,
+    description: `${map.nodes.length} nodes / ${map.edges.length} branches`
+  }))));
+  for (const map of allMaps) {
+    await addFile(`maps/${slugify(map.id)}.md`, okfMapConcept(map));
+    await addFile(`nodes/${slugify(map.id)}/index.md`, okfDirectoryIndex(`${map.label} Nodes`, map.nodes.map((node) => ({
+      title: node.title,
+      href: `${slugify(node.id)}.md`,
+      description: `${okfTypeForNode(node)} / ${node.status || REVIEW_NODE_STATUS}`
+    }))));
+    for (const node of map.nodes) {
+      await addFile(`nodes/${slugify(map.id)}/${slugify(node.id)}.md`, okfNodeConcept(map, node));
+      for (const [idx, qa] of (node.sourceQa || []).entries()) {
+        await addFile(`references/qa/${slugify(map.id)}/${slugify(node.id)}-${idx + 1}.md`, okfQaConcept(map, node, qa, idx));
+      }
+    }
+  }
+  await addFile("log.md", okfLogConcept());
+}
+
+function okfLogConcept() {
+  const today = new Date().toISOString().slice(0, 10);
+  return [
+    "# Directory Update Log",
+    "",
+    `## ${today}`,
+    `* **Update**: Regenerated OKF bundle from the current Distill support knowledge state.`
+  ].join("\n") + "\n";
+}
+
 async function ensureDataDir() {
   await mkdir(DATA_DIR, { recursive: true, mode: 0o700 });
 }
@@ -1243,6 +1673,7 @@ async function savePersistedMaps() {
   await ensureDataDir();
   const maps = [...mapsStore.values()];
   const workspaces = [...workspacesStore.values()];
+  await writeOkfBundle(workspaces, maps);
   await writeFile(MAPS_FILE, JSON.stringify({ version: 2, savedAt: new Date().toISOString(), workspaces, maps }, null, 2), { mode: 0o600 });
 }
 

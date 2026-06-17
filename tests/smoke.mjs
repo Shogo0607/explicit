@@ -125,6 +125,14 @@ try {
 
   const persisted = JSON.parse(await readFile(path.join(dataDir, "maps.json"), "utf8"));
   assert.ok(persisted.maps.some((map) => map.id === imported.map.id));
+  const okfNode = await readFile(path.join(dataDir, "okf", "nodes", imported.map.id, "c1.md"), "utf8");
+  assert.match(okfNode, /type: Root Cause/);
+  assert.match(okfNode, /app_schema: distill-support-map\/v1/);
+  assert.match(okfNode, /outcomes:/);
+  assert.match(okfNode, /# Agent Instructions/);
+  const okfExport = await fetchJson(`http://localhost:${port}/api/maps/${imported.map.id}/export?format=okf`);
+  assert.equal(okfExport.okf_version, "0.1");
+  assert.ok(okfExport.files[`nodes/${imported.map.id}/c1.md`]);
 
   const maps = await fetchJson(`http://localhost:${port}/api/maps`);
   assert.ok(maps.maps.some((map) => map.id === imported.map.id));
@@ -238,6 +246,23 @@ try {
   assert.match(exportedSkill, /# CSV取り込みマップ/);
   assert.match(exportedSkill, /## Answer Workflow/);
   assert.match(exportedSkill, /### Webhookが発火しない/);
+
+  child.kill();
+  await delay(200);
+  const restartPort = port + 1;
+  const restarted = spawn(process.execPath, ["server.js"], {
+    env: { ...process.env, PORT: String(restartPort), OPENAI_API_KEY: "", OPENAI_DISABLED: "1", SETTINGS_ENV_FILE: settingsEnvFile, DATA_DIR: dataDir },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+  try {
+    await waitForServer(restartPort);
+    const okfLoadedMap = await fetchJson(`http://localhost:${restartPort}/api/maps/${imported.map.id}`);
+    assert.equal(okfLoadedMap.map.id, imported.map.id);
+    assert.ok(okfLoadedMap.map.nodes.some((node) => node.id === webhookNode.id && node.status === "review"));
+    assert.ok(okfLoadedMap.map.edges.some((edge) => edge.from === "root" && edge.to === webhookNode.id));
+  } finally {
+    restarted.kill();
+  }
 } finally {
   child.kill();
   await rm(envDir, { recursive: true, force: true });
